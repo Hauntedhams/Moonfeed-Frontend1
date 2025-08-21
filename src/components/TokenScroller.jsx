@@ -3,7 +3,7 @@ import './TokenScroller.css';
 import CoinCard from './CoinCard';
 import AboutModal from './AboutModal';
 
-const API_BASE = 'http://localhost:3001/api/coins';
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/coins`;
 
 function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChange, filters = {}, onTradeClick, onVisibleCoinsChange, onCurrentCoinChange }) {
   const [coins, setCoins] = useState([]);
@@ -69,7 +69,7 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
       }, 100); // Slightly longer delay for smoother UI
     }
     // eslint-disable-next-line
-  }, [JSON.stringify(filters), onlyFavorites]);
+  }, [filters?.type, onlyFavorites]);
 
   useEffect(() => {
     if (!onlyFavorites && coins.length === 0 && !loading && !error) {
@@ -528,7 +528,7 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
       // Update first 5 visible coins with enhanced validation
       for (const coin of coinsToUpdate.slice(0, 5)) {
         try {
-          const response = await fetch(`http://localhost:5000/api/graduation/${coin.tokenAddress}`);
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/graduation/${coin.tokenAddress}`);
           if (response.ok) {
             const data = await response.json();
             if (data.graduationData) {
@@ -604,7 +604,7 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
     setTopTradersLoading(true);
     setTopTradersError(null);
     try {
-      const res = await fetch(`http://localhost:4000/api/coin/top-traders/${coin.chainId}/${coin.tokenAddress}`);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/coin/top-traders/${coin.chainId}/${coin.tokenAddress}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setTopTradersData(data);
