@@ -155,10 +155,13 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
         setHasMore(false);
         if (reset && startOffset === 0) {
           console.log('🔍 No coins available from API');
+          console.log('🔍 API Response data:', data);
+          console.log('🔍 Reset:', reset, 'StartOffset:', startOffset);
           setError('No coins available at the moment. Please try again later.');
         }
       } else {
         console.log(`✅ Loaded ${data.coins.length} coins (offset: ${startOffset})`);
+        console.log('🔍 First coin:', data.coins[0]);
         setCoins(prev => reset ? data.coins : [...prev, ...data.coins]);
         setOffset(prev => reset ? data.coins.length : prev + data.coins.length);
       }
