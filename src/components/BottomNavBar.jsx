@@ -1,7 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './BottomNavBar.css';
 
 function BottomNavBar({ activeTab, setActiveTab }) {
+  // Dark mode state
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // Toggle dark mode and persist
+  const handleToggleDarkMode = () => {
+    setDarkMode(prev => {
+      localStorage.setItem('darkMode', JSON.stringify(!prev));
+      // Update document body class
+      if (!prev) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+      return !prev;
+    });
+  };
+
+  // Ensure body class matches state on mount
+  React.useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+
   return (
     <nav className="bottom-nav">
       <button className={`nav-btn${activeTab === 'home' ? ' active' : ''}`} onClick={() => setActiveTab('home')}>
@@ -11,12 +40,18 @@ function BottomNavBar({ activeTab, setActiveTab }) {
         </span>
         <span className="nav-label">Home</span>
       </button>
-      <button className={`nav-btn${activeTab === 'filters' ? ' active' : ''}`} onClick={() => setActiveTab('filters')}>
+      {/* Dark/Light mode toggle button */}
+      <button className="nav-btn" onClick={handleToggleDarkMode} title="Toggle dark/light mode">
         <span className="nav-icon">
-          {/* Filter/Search icon */}
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5"/><line x1="14.2929" y1="14.7071" x2="18" y2="18.4142" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          {darkMode ? (
+            // Moon icon for dark mode
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 12.5A7 7 0 0 1 7.5 3a7 7 0 1 0 9.5 9.5z" stroke="currentColor" strokeWidth="1.5"/></svg>
+          ) : (
+            // Sun icon for light mode
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="1.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M15.66 15.66l1.41 1.41M4.93 15.07l1.41-1.41M15.66 4.34l1.41-1.41" stroke="currentColor" strokeWidth="1.5"/></svg>
+          )}
         </span>
-        <span className="nav-label">Filters</span>
+        <span className="nav-label">{darkMode ? 'Dark' : 'Light'}</span>
       </button>
       <button className={`nav-btn nav-btn-trade${activeTab === 'trade' ? ' active' : ''}`} onClick={() => setActiveTab('trade')}>
         <span className="nav-icon">

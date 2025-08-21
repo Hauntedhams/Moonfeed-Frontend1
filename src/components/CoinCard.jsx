@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
+import AboutModal from './AboutModal';
 
 const CoinCard = memo(({ 
   coin, 
@@ -8,6 +9,7 @@ const CoinCard = memo(({
   isGraduating, 
   isTrending 
 }) => {
+  const [showAboutModal, setShowAboutModal] = useState(false);
   return (
     <div className="coin-card">
       <div className="coin-header">
@@ -45,6 +47,13 @@ const CoinCard = memo(({
             {isFavorite ? '❤️' : '🤍'}
           </button>
           <button
+            className="about-btn"
+            onClick={() => setShowAboutModal(true)}
+            title="About this coin"
+          >
+            ℹ️
+          </button>
+          <button
             className="trade-btn"
             onClick={() => onTradeClick(coin)}
             title="Trade this coin"
@@ -78,6 +87,14 @@ const CoinCard = memo(({
           </div>
         )}
       </div>
+      
+      {/* About Modal */}
+      <AboutModal 
+        coin={coin}
+        isOpen={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+        onTradeClick={onTradeClick}
+      />
     </div>
   );
 });

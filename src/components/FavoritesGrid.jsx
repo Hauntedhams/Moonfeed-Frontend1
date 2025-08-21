@@ -2,6 +2,9 @@ import React from 'react';
 import './FavoritesGrid.css';
 
 function FavoritesGrid({ favorites = [], onCoinClick, onFavoritesChange }) {
+  // Temporarily disable liquidity lock filter for testing
+  const filteredFavorites = favorites; // .filter(coin => coin.liquidityLocked === true);
+  
   // Helper to toggle favorite
   const toggleFavorite = (coin) => {
     const updated = favorites.filter(fav => fav.id !== coin.id);
@@ -9,13 +12,13 @@ function FavoritesGrid({ favorites = [], onCoinClick, onFavoritesChange }) {
     if (onFavoritesChange) onFavoritesChange(updated);
   };
 
-  if (favorites.length === 0) {
+  if (filteredFavorites.length === 0) {
     return (
       <div className="favorites-empty">
         <div className="empty-state">
           <div className="empty-icon">⭐</div>
           <h2>No Favorites Yet</h2>
-          <p>Start favoriting coins to see them here in a beautiful grid view!</p>
+          <p>Start favoriting coins to see them here!</p>
         </div>
       </div>
     );
@@ -25,12 +28,18 @@ function FavoritesGrid({ favorites = [], onCoinClick, onFavoritesChange }) {
     <div className="favorites-grid-container">
       <div className="favorites-header">
         <h1>Your Favorites</h1>
-        <p>{favorites.length} coin{favorites.length !== 1 ? 's' : ''} saved</p>
+        <p>{filteredFavorites.length} coin{filteredFavorites.length !== 1 ? 's' : ''} saved</p>
       </div>
       
       <div className="favorites-grid">
-        {favorites.map((coin) => (
-          <div key={coin.id} className="favorite-card">
+        {filteredFavorites.map((coin) => (
+          <div 
+            key={coin.id} 
+            className="favorite-card"
+            onClick={() => onCoinClick && onCoinClick(coin)}
+            style={{ cursor: 'pointer' }}
+            title="Click to view coin details"
+          >
             {/* Remove favorite button */}
             <button
               className="remove-favorite-btn"
@@ -60,11 +69,9 @@ function FavoritesGrid({ favorites = [], onCoinClick, onFavoritesChange }) {
               </div>
             </div>
 
-            {/* Chart - Main clickable area */}
+            {/* Chart - Main display area */}
             <div 
               className="chart-container"
-              onClick={() => onCoinClick && onCoinClick(coin)}
-              title="Click to view full details"
             >
               {coin.tokenAddress && coin.chainId ? (
               <div style={{ position: 'relative', height: '100%' }}>
@@ -89,9 +96,10 @@ function FavoritesGrid({ favorites = [], onCoinClick, onFavoritesChange }) {
                   letterSpacing: '0.5px'
                 }}
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent card navigation
                   window.open(`https://dexscreener.com/${coin.chainId}/${coin.tokenAddress}`, '_blank');
                 }}
+                title="Open on DexScreener (new tab)"
                 >
                   Tracked by DEXSCREENER
                 </div>

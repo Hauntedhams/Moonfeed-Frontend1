@@ -1,16 +1,37 @@
+/* Light mode (default) */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #000000;
-
+  color-scheme: light;
+  color: #222;
+  background-color: #f8f9fb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Light mode body styles */
+body {
+  background: #f8f9fb !important;
+  color: #222 !important;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Ensure root element inherits body background */
+#root {
+  background: inherit !important;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background: #111 !important;
+  color: #fff !important;
+}
+
+body.dark-mode #root {
+  background: inherit !important;
 }
 
 a {
@@ -28,7 +49,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #000000;
 }
 
 h1 {

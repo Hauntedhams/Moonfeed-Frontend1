@@ -1,0 +1,199 @@
+/* Jupiter Embed Modal Styles */
+
+.jupiter-embed-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.jupiter-embed-modal {
+  width: 420px;
+  height: 100vh;
+  background: #0a0b0f;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.jupiter-embed-modal.visible {
+  transform: translateX(0);
+}
+
+.jupiter-embed-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0a0b0f;
+  min-height: 80px;
+}
+
+.jupiter-embed-coin-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jupiter-embed-coin-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.jupiter-embed-coin-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jupiter-embed-coin-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.jupiter-embed-coin-symbol {
+  color: #8892b0;
+  font-size: 14px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.jupiter-embed-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8892b0;
+  font-size: 24px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.jupiter-embed-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.jupiter-embed-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.jupiter-embed-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #8892b0;
+}
+
+.jupiter-embed-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(199, 242, 132, 0.2);
+  border-top: 3px solid #c7f284;
+  border-radius: 50%;
+  animation: jupiterSpin 1s linear infinite;
+}
+
+@keyframes jupiterSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.jupiter-embed-loading p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.jupiter-embed-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Override Jupiter's default styles to fit our modal */
+#jupiter-plugin-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+/* Ensure Jupiter container fills the available space */
+#jupiter-plugin-container > div {
+  height: 100% !important;
+  border-radius: 0 !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .jupiter-embed-modal {
+    width: 100vw;
+    border-right: none;
+  }
+  
+  .jupiter-embed-header {
+    padding: 16px;
+    min-height: 70px;
+  }
+  
+  .jupiter-embed-coin-image {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .jupiter-embed-coin-name {
+    font-size: 16px;
+  }
+  
+  .jupiter-embed-coin-symbol {
+    font-size: 13px;
+  }
+  
+  .jupiter-embed-close {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+}
+
+/* Dark theme adjustments for Jupiter */
+.jupiter-embed-modal :global(.bg-black) {
+  background-color: #0a0b0f !important;
+}
+
+.jupiter-embed-modal :global(.text-white) {
+  color: #ffffff !important;
+}
+
+.jupiter-embed-modal :global(.border-white\/10) {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}

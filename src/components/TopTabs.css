@@ -1,0 +1,111 @@
+.top-tabs-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: transparent; /* Fully transparent background */
+  backdrop-filter: none; /* Remove blur effect */
+  -webkit-backdrop-filter: none;
+  border-bottom: none; /* Remove border */
+  padding: 4px 0 2px 0; /* Minimal padding for very small gap */
+  box-shadow: none; /* Remove shadow */
+}
+
+.top-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px; /* Increased gap since no icons */
+  padding: 0 20px;
+  max-width: 300px; /* Adjusted for text-only tabs */
+  margin: 0 auto;
+  position: relative;
+}
+
+.top-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px; /* Reduced padding for smaller height */
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px; /* Smaller border radius */
+  min-height: 24px; /* Much smaller height for small gap */
+  position: relative;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.top-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.top-tab.active {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 16px rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.top-tab.center:not(.active) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tab-icon {
+  display: none; /* Hide icons completely */
+}
+
+.tab-label {
+  font-size: 12px; /* Increased slightly since no icons */
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.top-tab.active .tab-label {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.top-tab.center:not(.active) .tab-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Remove progress bar styles since we're using rotating design */
+.tab-progress-container,
+.tab-progress-bar {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .top-tabs-wrapper {
+    padding: 0 16px;
+    max-width: 280px; /* Adjusted for mobile text-only tabs */
+    gap: 10px;
+  }
+  
+  .top-tab {
+    padding: 3px 6px; /* Smaller padding on mobile */
+    min-height: 20px; /* Smaller height on mobile */
+  }
+  
+  .tab-label {
+    font-size: 10px; /* Smaller font on mobile */
+  }
+}
+
+/* Add safe area for devices with notches */
+@supports (top: env(safe-area-inset-top)) {
+  .top-tabs-container {
+    padding-top: calc(env(safe-area-inset-top) + 8px); /* Reduced for small gap */
+  }
+}
