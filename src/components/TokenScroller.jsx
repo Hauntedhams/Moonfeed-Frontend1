@@ -60,6 +60,7 @@ const TokenScroller = React.memo(function TokenScroller({ favorites = [], onlyFa
 
   // Reset coins when filters change (not just type)
   useEffect(() => {
+    console.log('🔄 Filter change detected:', filters?.type, 'onlyFavorites:', onlyFavorites);
     if (!onlyFavorites) {
       setCoins([]);
       setOffset(0);
@@ -515,125 +516,62 @@ const TokenScroller = React.memo(function TokenScroller({ favorites = [], onlyFa
     });
   }, []);
 
-  // Real-time graduation data updates (enhanced with better validation and user activity detection)
-  useEffect(() => {
-    if (onlyFavorites) return;
+  // Manual refresh function for graduation data (user-initiated)
+  const refreshGraduationData = useCallback(async () => {
+    if (onlyFavorites || coins.length === 0) return;
     
-    let lastUserActivity = Date.now();
-    let isUserActive = false;
+    console.log('🔄 Manual graduation data refresh requested');
     
-    // Track user activity to avoid disrupting viewing experience
-    const trackActivity = () => {
-      lastUserActivity = Date.now();
-      isUserActive = true;
-      setTimeout(() => { isUserActive = false; }, 10000); // Consider inactive after 10 seconds
-    };
+    // Only update if we have coins and they're from pump.fun
+    const coinsToUpdate = coins.filter(coin => 
+      coin.tokenAddress && 
+      (coin.source === 'pump.fun' || 
+       coin.tokenAddress?.includes('pump') || 
+       coin.tokenAddress?.endsWith('pump') ||
+       coin.isGraduating === true ||
+       (typeof coin.graduationPercent === 'number' && coin.graduationPercent >= 0 && coin.graduationPercent < 100))
+    );
     
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', trackActivity);
-      container.addEventListener('touchstart', trackActivity);
-      container.addEventListener('click', trackActivity);
-    }
+    if (coinsToUpdate.length === 0) return;
     
-    const updateGraduationData = async () => {
-      // Skip update if user is actively interacting (prevents UI disruption)
-      if (isUserActive) {
-        console.log('⏸️ Skipping graduation update - user is actively viewing');
-        return;
-      }
-      
-      // Only update if we have coins and they're from pump.fun
-      const coinsToUpdate = coins.filter(coin => 
-        coin.tokenAddress && 
-        (coin.source === 'pump.fun' || 
-         coin.tokenAddress?.includes('pump') || 
-         coin.tokenAddress?.endsWith('pump') ||
-         coin.isGraduating === true ||
-         (typeof coin.graduationPercent === 'number' && coin.graduationPercent >= 0 && coin.graduationPercent < 100))
-      );
-      
-      if (coinsToUpdate.length === 0) return;
-      
-      console.log(`🔄 Updating graduation data for ${coinsToUpdate.length} pump.fun coins...`);
-      
-      // Update first 5 visible coins with enhanced validation
-      for (const coin of coinsToUpdate.slice(0, 5)) {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/graduation/${coin.tokenAddress}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.graduationData) {
-              const newPercent = data.graduationData.graduationPercent;
-              const oldPercent = coin.graduationPercent;
-              const source = data.graduationData.source || 'unknown';
-              const calculationMethod = data.graduationData.calculationMethod || 'unknown';
+    console.log(`🔄 Refreshing graduation data for ${coinsToUpdate.length} pump.fun coins...`);
+    
+    // Update first 10 visible coins
+    for (const coin of coinsToUpdate.slice(0, 10)) {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/graduation/${coin.tokenAddress}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.graduationData) {
+            const newPercent = data.graduationData.graduationPercent;
+            const oldPercent = coin.graduationPercent;
+            
+            if (typeof newPercent === 'number' && newPercent >= 0 && newPercent <= 100) {
+              console.log(`🔄 Updated ${coin.symbol}: ${oldPercent?.toFixed(2) || 'N/A'}% -> ${newPercent.toFixed(3)}%`);
               
-              // Enhanced validation: only update if the new data seems reasonable and accurate
-              const isValidUpdate = (
-                typeof newPercent === 'number' && 
-                newPercent >= 0 && 
-                newPercent <= 100 &&
-                // Additional validation: change shouldn't be too dramatic unless justified
-                (oldPercent === undefined || 
-                 Math.abs(newPercent - oldPercent) <= 10 || // Allow max 10% change per update
-                 source === 'dexscreener-calculation' || // Trust high-quality sources
-                 source === 'blockchain-calculation' ||
-                 (Math.abs(newPercent - oldPercent) <= 25 && calculationMethod.includes('validated'))) // Allow larger changes if validated
+              // Update the coin in state with enhanced data
+              setCoins(prevCoins => 
+                prevCoins.map(c => 
+                  c.tokenAddress === coin.tokenAddress ? {
+                    ...c,
+                    graduationPercent: newPercent,
+                    isGraduating: data.graduationData.isGraduating,
+                    isMigrating: data.graduationData.isMigrating,
+                    isGraduated: data.graduationData.isGraduated,
+                    lastUpdated: Date.now()
+                  } : c
+                )
               );
-              
-              if (isValidUpdate) {
-                const changeIndicator = oldPercent !== undefined ? 
-                  (newPercent > oldPercent ? '📈' : newPercent < oldPercent ? '📉' : '➡️') : '🆕';
-                
-                console.log(`🔄 ${changeIndicator} Updating ${coin.symbol}: ${oldPercent?.toFixed(2) || 'N/A'}% -> ${newPercent.toFixed(3)}% (${source})`);
-                
-                // Update the coin in state with enhanced data
-                setCoins(prevCoins => 
-                  prevCoins.map(c => 
-                    c.tokenAddress === coin.tokenAddress ? {
-                      ...c,
-                      graduationPercent: newPercent,
-                      isGraduating: data.graduationData.isGraduating,
-                      isMigrating: data.graduationData.isMigrating,
-                      isGraduated: data.graduationData.isGraduated,
-                      source: source,
-                      calculationMethod: calculationMethod,
-                      lastUpdated: Date.now(), // Track when last updated
-                      metadata: data.graduationData.metadata // Include additional metadata
-                    } : c
-                  )
-                );
-              } else {
-                console.warn(`⚠️ Rejected graduation data update for ${coin.symbol}: ${oldPercent?.toFixed(2) || 'N/A'}% -> ${newPercent?.toFixed(2) || 'N/A'}% (reason: validation failed, source: ${source})`);
-              }
             }
           }
-        } catch (e) {
-          console.error(`❌ Failed to update graduation data for ${coin.symbol}:`, e);
         }
-        
-        // Add small delay between requests to avoid overwhelming the API
-        await new Promise(resolve => setTimeout(resolve, 200));
+      } catch (e) {
+        console.error(`❌ Failed to update graduation data for ${coin.symbol}:`, e);
       }
-    };
-    
-    // Update graduation data every 5 minutes (reduced from 45 seconds to prevent UX disruption)
-    const intervalId = setInterval(updateGraduationData, 300000); // 5 minutes
-    
-    // Also update once on mount after a short delay
-    const timeoutId = setTimeout(updateGraduationData, 2000);
-    
-    return () => {
-      clearInterval(intervalId);
-      clearTimeout(timeoutId);
-      // Clean up event listeners
-      if (container) {
-        container.removeEventListener('scroll', trackActivity);
-        container.removeEventListener('touchstart', trackActivity);
-        container.removeEventListener('click', trackActivity);
-      }
-    };
+      
+      // Add small delay between requests
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }, [coins, onlyFavorites]);
 
   // Top Traders fetch logic
