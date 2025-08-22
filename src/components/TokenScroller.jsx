@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import './TokenScroller.css';
 import CoinCard from './CoinCard';
 import AboutModal from './AboutModal';
 
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/coins`;
 
-function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChange, filters = {}, onTradeClick, onVisibleCoinsChange, onCurrentCoinChange }) {
+// Memoize the component to prevent unnecessary re-renders
+const TokenScroller = React.memo(function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChange, filters = {}, onTradeClick, onVisibleCoinsChange, onCurrentCoinChange }) {
   const [coins, setCoins] = useState([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -323,11 +324,13 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
     localStorage.setItem('bannerSize', JSON.stringify(bannerSize));
   }, [bannerSize]);
 
-  // Show only favorites if onlyFavorites is true, otherwise show all coins
-  let coinsToShow = onlyFavorites ? favorites : coins;
+  // Memoize the coin processing to prevent excessive recalculation
+  const coinsToShow = useMemo(() => {
+    // Show only favorites if onlyFavorites is true, otherwise show all coins
+    let processedCoins = onlyFavorites ? favorites : coins;
 
-  // Compute isGraduating and isTrending in a single pass
-  coinsToShow = coinsToShow.map(c => {
+    // Compute isGraduating and isTrending in a single pass
+    processedCoins = processedCoins.map(c => {
     // --- Graduating logic (STRICT: 0-99% only) ---
     let isGraduating = false;
     if (
@@ -391,7 +394,7 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
   // Apply filters if present
   if (filters) {
     // Temporarily make liquidity lock filter more lenient for testing
-    // coinsToShow = coinsToShow.filter(c => c.liquidityLocked === true);
+    // processedCoins = processedCoins.filter(c => c.liquidityLocked === true);
     
     if (filters.type === 'graduating') {
       // Trust backend for graduating filter - it already applies strict filtering for 0-99% graduation
@@ -399,29 +402,32 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
       // No additional frontend filtering needed as backend is already strict
     } else if (filters.type === 'trending') {
       // Do not filter by isTrending, trust backend
-      // coinsToShow = coinsToShow.filter(c => c.isTrending);
+      // processedCoins = processedCoins.filter(c => c.isTrending);
     } else if (filters.type === 'new') {
-      coinsToShow = coinsToShow.filter(c => !c.isGraduating && !c.isTrending);
+      processedCoins = processedCoins.filter(c => !c.isGraduating && !c.isTrending);
     }
     if (filters.marketCapMin !== undefined) {
-      coinsToShow = coinsToShow.filter(c => Number(c.marketCap) >= filters.marketCapMin);
+      processedCoins = processedCoins.filter(c => Number(c.marketCap) >= filters.marketCapMin);
     }
     if (filters.marketCapMax !== undefined) {
-      coinsToShow = coinsToShow.filter(c => Number(c.marketCap) <= filters.marketCapMax);
+      processedCoins = processedCoins.filter(c => Number(c.marketCap) <= filters.marketCapMax);
     }
     if (filters.volumeMin !== undefined) {
-      coinsToShow = coinsToShow.filter(c => Number(c.volume) >= filters.volumeMin);
+      processedCoins = processedCoins.filter(c => Number(c.volume) >= filters.volumeMin);
     }
     if (filters.volumeMax !== undefined) {
-      coinsToShow = coinsToShow.filter(c => Number(c.volume) <= filters.volumeMax);
+      processedCoins = processedCoins.filter(c => Number(c.volume) <= filters.volumeMax);
     }
     if (filters.liquidityMin !== undefined) {
-      coinsToShow = coinsToShow.filter(c => Number(c.liquidity) >= filters.liquidityMin);
+      processedCoins = processedCoins.filter(c => Number(c.liquidity) >= filters.liquidityMin);
     }
     if (filters.liquidityMax !== undefined) {
-      coinsToShow = coinsToShow.filter(c => Number(c.liquidity) <= filters.liquidityMax);
+      processedCoins = processedCoins.filter(c => Number(c.liquidity) <= filters.liquidityMax);
     }
   }
+
+  return processedCoins;
+}, [onlyFavorites, favorites, coins, filters]);
 
   // Update visible coins for parent component
   useEffect(() => {
@@ -631,7 +637,7 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
       background: '#000000',
       paddingTop: '0' // removed padding since top tabs handle spacing now
     }}>
-      {console.log('TokenScroller render', { coinsToShow, error, loading, onlyFavorites })}
+      {/* Removed console.log from render - was causing infinite re-renders */}
       {error && (
         <div style={{ 
           color: '#e2557b', 
@@ -2213,6 +2219,6 @@ function TokenScroller({ favorites = [], onlyFavorites = false, onFavoritesChang
       )}
     </div>
   );
-}
+});
 
 export default TokenScroller;
