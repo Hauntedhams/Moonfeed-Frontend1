@@ -515,11 +515,34 @@ const TokenScroller = React.memo(function TokenScroller({ favorites = [], onlyFa
     });
   }, []);
 
-  // Real-time graduation data updates (enhanced with better validation)
+  // Real-time graduation data updates (enhanced with better validation and user activity detection)
   useEffect(() => {
     if (onlyFavorites) return;
     
+    let lastUserActivity = Date.now();
+    let isUserActive = false;
+    
+    // Track user activity to avoid disrupting viewing experience
+    const trackActivity = () => {
+      lastUserActivity = Date.now();
+      isUserActive = true;
+      setTimeout(() => { isUserActive = false; }, 10000); // Consider inactive after 10 seconds
+    };
+    
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', trackActivity);
+      container.addEventListener('touchstart', trackActivity);
+      container.addEventListener('click', trackActivity);
+    }
+    
     const updateGraduationData = async () => {
+      // Skip update if user is actively interacting (prevents UI disruption)
+      if (isUserActive) {
+        console.log('⏸️ Skipping graduation update - user is actively viewing');
+        return;
+      }
+      
       // Only update if we have coins and they're from pump.fun
       const coinsToUpdate = coins.filter(coin => 
         coin.tokenAddress && 
@@ -595,8 +618,8 @@ const TokenScroller = React.memo(function TokenScroller({ favorites = [], onlyFa
       }
     };
     
-    // Update graduation data every 45 seconds (balanced between freshness and API load)
-    const intervalId = setInterval(updateGraduationData, 45000);
+    // Update graduation data every 5 minutes (reduced from 45 seconds to prevent UX disruption)
+    const intervalId = setInterval(updateGraduationData, 300000); // 5 minutes
     
     // Also update once on mount after a short delay
     const timeoutId = setTimeout(updateGraduationData, 2000);
@@ -604,6 +627,12 @@ const TokenScroller = React.memo(function TokenScroller({ favorites = [], onlyFa
     return () => {
       clearInterval(intervalId);
       clearTimeout(timeoutId);
+      // Clean up event listeners
+      if (container) {
+        container.removeEventListener('scroll', trackActivity);
+        container.removeEventListener('touchstart', trackActivity);
+        container.removeEventListener('click', trackActivity);
+      }
     };
   }, [coins, onlyFavorites]);
 
