@@ -1,0 +1,95 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 16px; /* lifted from bottom edge */
+  left: 50%;
+  transform: translateX(-50%); /* center horizontally */
+  width: calc(100vw - 32px); /* margin on sides */
+  max-width: 650px; /* match max width of cards */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.95) !important; /* modern black with slight transparency */
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  padding: 0 4px;
+  height: 56px; /* increased height for modern feel */
+  gap: 0.5vw;
+  border: 1px solid rgba(255, 255, 255, 0.08); /* subtle light border */
+  border-radius: 32px; /* rounded like the cards */
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7); /* light gray for inactive state */
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 44px;
+  cursor: pointer;
+  padding: 8px 0; /* increased padding for modern feel */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* smooth modern transition */
+  border-radius: 12px; /* more rounded for modern look */
+}
+
+.nav-btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px); /* subtle hover lift */
+}
+
+.nav-btn.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-btn:active, .nav-btn:focus {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.nav-btn-trade {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #fff !important;
+  border-radius: 16px; /* more rounded */
+  min-width: 60px;
+  font-weight: 700;
+  font-size: 14px;
+  margin: 0 8px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.nav-btn-trade:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.nav-btn-trade.active {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.nav-btn-profile {
+  margin-left: auto;
+}
+
+.nav-icon {
+  font-size: 18px;
+  margin-bottom: 1px;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: inherit; /* inherit color from parent nav-btn */
+  margin-top: 2px;
+}
