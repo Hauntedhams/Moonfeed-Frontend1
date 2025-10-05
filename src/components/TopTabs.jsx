@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TopTabs.css';
 
-const TopTabs = ({ activeFilter, onFilterChange }) => {
+const TopTabs = ({ activeFilter, onFilterChange, showFilterButton = false, onFilterClick, isFilterActive = false, onActiveTabClick }) => {
   const [touchStartX, setTouchStartX] = useState(0);
   const [touchEndX, setTouchEndX] = useState(0);
   const containerRef = useRef(null);
 
   const tabs = [
+    { id: 'trending', label: 'Trending', icon: 'fire' },
     { id: 'new', label: 'New', icon: 'sparkles' },
     { id: 'graduating', label: 'Graduating', icon: 'graduation-cap' },
-    { id: 'trending', label: 'Trending', icon: 'fire' }
+    { id: 'custom', label: 'Custom', icon: 'filter' }
   ];
 
   const currentIndex = tabs.findIndex(tab => tab.id === activeFilter);
@@ -51,23 +52,57 @@ const TopTabs = ({ activeFilter, onFilterChange }) => {
             <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
           </svg>
         );
+      case 'trending-up':
+        return (
+          <svg {...iconProps}>
+            <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+            <polyline points="16,7 22,7 22,13"/>
+          </svg>
+        );
+      case 'zap':
+        return (
+          <svg {...iconProps}>
+            <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+          </svg>
+        );
+      case 'star':
+        return (
+          <svg {...iconProps}>
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
+          </svg>
+        );
+      case 'filter':
+        return (
+          <svg {...iconProps}>
+            <path d="M3 4.5H21V6H3V4.5ZM6 10.5H18V12H6V10.5ZM9 16.5H15V18H9V16.5Z"/>
+          </svg>
+        );
       default:
         return null;
     }
   };
 
-  // Create reordered tabs array to always put active tab in center position
+  // Create reordered tabs array with active tab in center
   const getReorderedTabs = () => {
-    if (currentIndex === 0) {
-      // New is active: [graduating, new, trending]
-      return [tabs[1], tabs[0], tabs[2]];
-    } else if (currentIndex === 1) {
-      // Graduating is active: [new, graduating, trending]
-      return [tabs[0], tabs[1], tabs[2]];
-    } else {
-      // Trending is active: [new, trending, graduating]
-      return [tabs[0], tabs[2], tabs[1]];
-    }
+    const activeIndex = tabs.findIndex(tab => tab.id === activeFilter);
+    if (activeIndex === -1) return tabs;
+
+    // Create a new array with the active tab in the center (index 1)
+    const reordered = [];
+    const totalTabs = tabs.length;
+    
+    // Previous tab (left)
+    const prevIndex = (activeIndex - 1 + totalTabs) % totalTabs;
+    reordered.push({ ...tabs[prevIndex], position: 'left' });
+    
+    // Active tab (center)
+    reordered.push({ ...tabs[activeIndex], position: 'center' });
+    
+    // Next tab (right)
+    const nextIndex = (activeIndex + 1) % totalTabs;
+    reordered.push({ ...tabs[nextIndex], position: 'right' });
+    
+    return reordered;
   };
 
   const reorderedTabs = getReorderedTabs();
@@ -82,27 +117,21 @@ const TopTabs = ({ activeFilter, onFilterChange }) => {
   };
 
   const handleTouchEnd = () => {
-    if (!touchStartX || !touchEndX) return;
-    
+    // Handle swipe functionality for navigation between tabs
+    // Only allow swiping to trending tab since others are disabled
+    const minSwipeDistance = 50;
     const distance = touchStartX - touchEndX;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    // Circular order: new → trending → graduating → new → trending → graduating...
-    const circularOrder = ['new', 'trending', 'graduating'];
-    const currentCircularIndex = circularOrder.indexOf(activeFilter);
     
-    if (isLeftSwipe) {
-      // Swipe left - go to previous tab in circular order (reverse direction)
-      const prevIndex = (currentCircularIndex - 1 + circularOrder.length) % circularOrder.length;
-      onFilterChange({ type: circularOrder[prevIndex] });
-    } else if (isRightSwipe) {
-      // Swipe right - go to next tab in circular order (forward direction)
-      const nextIndex = (currentCircularIndex + 1) % circularOrder.length;
-      onFilterChange({ type: circularOrder[nextIndex] });
+    if (Math.abs(distance) > minSwipeDistance) {
+      const currentIndex = tabs.findIndex(tab => tab.id === activeFilter);
+      const targetIndex = distance > 0 ? currentIndex + 1 : currentIndex - 1;
+      
+      // Only switch to trending or custom tabs
+      if (targetIndex >= 0 && targetIndex < tabs.length && (tabs[targetIndex].id === 'trending' || tabs[targetIndex].id === 'custom')) {
+        onFilterChange({ type: tabs[targetIndex].id });
+      }
     }
-
-    // Reset touch positions
+    
     setTouchStartX(0);
     setTouchEndX(0);
   };
@@ -118,26 +147,21 @@ const TopTabs = ({ activeFilter, onFilterChange }) => {
     };
 
     const handleGlobalTouchEnd = () => {
-      if (!touchStartX || !touchEndX) return;
-      
+      // Handle global swipe functionality for navigation between tabs
+      // Only allow swiping to trending tab since others are disabled
+      const minSwipeDistance = 50;
       const distance = touchStartX - touchEndX;
-      const isLeftSwipe = distance > 50;
-      const isRightSwipe = distance < -50;
-
-      // Circular order: new → trending → graduating → new → trending → graduating...
-      const circularOrder = ['new', 'trending', 'graduating'];
-      const currentCircularIndex = circularOrder.indexOf(activeFilter);
       
-      if (isLeftSwipe) {
-        // Swipe left - go to previous tab in circular order (reverse direction)
-        const prevIndex = (currentCircularIndex - 1 + circularOrder.length) % circularOrder.length;
-        onFilterChange({ type: circularOrder[prevIndex] });
-      } else if (isRightSwipe) {
-        // Swipe right - go to next tab in circular order (forward direction)
-        const nextIndex = (currentCircularIndex + 1) % circularOrder.length;
-        onFilterChange({ type: circularOrder[nextIndex] });
+      if (Math.abs(distance) > minSwipeDistance) {
+        const currentIndex = tabs.findIndex(tab => tab.id === activeFilter);
+        const targetIndex = distance > 0 ? currentIndex + 1 : currentIndex - 1;
+        
+        // Only switch to trending or custom tabs
+        if (targetIndex >= 0 && targetIndex < tabs.length && (tabs[targetIndex].id === 'trending' || tabs[targetIndex].id === 'custom')) {
+          onFilterChange({ type: tabs[targetIndex].id });
+        }
       }
-
+      
       setTouchStartX(0);
       setTouchEndX(0);
     };
@@ -158,41 +182,73 @@ const TopTabs = ({ activeFilter, onFilterChange }) => {
       <div className="top-tabs-wrapper">
         {reorderedTabs.map((tab, index) => {
           const isActive = activeFilter === tab.id;
-          const isCenter = index === 1; // Center position in reordered array
+          const isCenter = tab.position === 'center';
           
-          // Visual styling based on position
-          let opacity, scale, zIndex;
+          // Visual styling based on active state and position
+          let opacity, zIndex, scale;
           
-          if (isActive) {
+          if (isActive && isCenter) {
             opacity = 1;
-            scale = 1.1;
             zIndex = 10;
+            scale = 1.05;
           } else if (isCenter) {
-            opacity = 0.7;
-            scale = 1;
-            zIndex = 5;
+            opacity = 1;
+            zIndex = 10;
+            scale = 1.05;
           } else {
-            opacity = 0.4;
-            scale = 0.85;
-            zIndex = 1;
+            opacity = 0.6; // Dimmed side tabs
+            zIndex = 5;
+            scale = 0.9;
           }
+          
+          const canClick = tab.id === 'trending' || tab.id === 'custom';
+          const showClickHint = isActive && isCenter && canClick && onActiveTabClick;
           
           return (
             <button
-              key={tab.id}
-              className={`top-tab ${isActive ? 'active' : ''} ${isCenter ? 'center' : ''}`}
-              onClick={() => onFilterChange({ type: tab.id })}
+              key={`${tab.id}-${tab.position}`}
+              className={`top-tab ${isActive ? 'active' : ''} ${tab.position} ${showClickHint ? 'clickable-active' : ''}`}
+              onClick={() => {
+                // Allow trending and custom tabs, new and graduating are disabled
+                if (tab.id === 'trending' || tab.id === 'custom') {
+                  // If clicking on the already active tab, show the coin list modal
+                  if (isActive && onActiveTabClick) {
+                    onActiveTabClick(tab.id);
+                  } else {
+                    onFilterChange({ type: tab.id });
+                  }
+                }
+              }}
               style={{
                 opacity,
-                transform: `scale(${scale})`,
                 zIndex,
+                transform: `scale(${scale})`,
+                cursor: (tab.id === 'trending' || tab.id === 'custom') ? 'pointer' : 'not-allowed'
               }}
             >
-              <span className="tab-label">{tab.label}</span>
+              <span className="tab-label" style={{
+                opacity: (tab.id === 'trending' || tab.id === 'custom') ? 1 : 0.5,
+                color: (tab.id === 'trending' || tab.id === 'custom')
+                  ? (isActive ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.8)')
+                  : 'rgba(255, 255, 255, 0.5)'
+              }}>{tab.label}</span>
             </button>
           );
         })}
       </div>
+      
+      {/* Filter Button - positioned absolutely in top right */}
+      {showFilterButton && (
+        <button
+          onClick={onFilterClick}
+          className={`top-tab filter-tab ${isFilterActive ? 'active' : ''}`}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 4.5H21V6H3V4.5ZM6 10.5H18V12H6V10.5ZM9 16.5H15V18H9V16.5Z" fill="currentColor"/>
+          </svg>
+          <span className="tab-label" style={{ fontSize: '9px', marginTop: '1px' }}>Filter</span>
+        </button>
+      )}
       
       {/* Progress indicator - removed since we have rotating design */}
     </div>

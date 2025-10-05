@@ -1,0 +1,440 @@
+/* Modern TikTok-style Token Scroller */
+.modern-token-scroller {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #0b1220 0%, #0e1426 50%, #0b1220 100%);
+  overflow: hidden;
+}
+
+/* Background enrichment status indicator */
+.enrichment-status {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+  animation: slideDown 0.3s ease;
+  max-width: 320px;
+  text-align: center;
+}
+
+@keyframes slideDown {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.enrichment-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.enrichment-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.enrichment-main {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.enrichment-detail {
+  font-size: 10px;
+  opacity: 0.8;
+  color: #cccccc;
+}
+
+.enrichment-spinner {
+  animation: spin 1s linear infinite;
+  font-size: 16px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.enrichment-progress {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.enrichment-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #4caf50);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.enrichment-status.completed {
+  background: rgba(76, 175, 80, 0.95);
+}
+
+.enrichment-status.error {
+  background: rgba(244, 67, 54, 0.95);
+}
+
+.modern-scroller-container {
+  height: 100vh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.modern-scroller-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Individual coin slides - optimized to prevent white flash */
+.modern-coin-slide {
+  height: 100vh;
+  width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(135deg, #0b1220 0%, #0e1426 50%, #0b1220 100%);
+  /* Removed transition to prevent flash during scroll */
+}
+
+.modern-coin-slide.active {
+  /* Visual enhancement for active slide */
+  box-shadow: inset 0 0 0 2px rgba(0, 212, 255, 0.3);
+}
+
+/* Loading States */
+.modern-scroller-loading {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  color: #ffffff;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.modern-scroller-loading p {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Error States */
+.modern-scroller-error {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  color: #ffffff;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.modern-scroller-error h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #ff6b6b;
+}
+
+.modern-scroller-error p {
+  font-size: 16px;
+  margin: 0 0 24px 0;
+  opacity: 0.8;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.retry-button {
+  background: #00d4ff;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background: #00b8e6;
+  transform: translateY(-2px);
+}
+
+.retry-button:active {
+  transform: translateY(0);
+}
+
+/* Empty States */
+.modern-scroller-empty {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  color: #ffffff;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.modern-scroller-empty h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #ffffff;
+}
+
+.modern-scroller-empty p {
+  font-size: 16px;
+  margin: 0;
+  opacity: 0.8;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+/* Loading more indicator */
+.modern-scroller-loading-more {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 12px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.small-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.indicator-track {
+  width: 4px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.indicator-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(180deg, #00d4ff 0%, #0099cc 100%);
+  border-radius: 2px;
+  transition: transform 0.3s ease;
+}
+
+.coin-counter {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  min-width: 50px;
+}
+
+/* Coin Card Integration Styles */
+.modern-coin-slide .coin-card,
+.modern-coin-slide .moonfeed-coin-card {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: none;
+}
+
+.modern-coin-slide .coin-chart-section,
+.modern-coin-slide .coin-chart-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  margin: 0;
+  padding: 20px;
+}
+
+.modern-coin-slide .coin-header {
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.modern-coin-slide .coin-stats {
+  flex-shrink: 0;
+  margin-top: 20px;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Disabled fadeInUp animation to prevent white flash during scrolling */
+/*
+.modern-coin-slide.active .coin-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+*/
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .modern-coin-slide .coin-card {
+    padding: 80px 16px 120px;
+  }
+  
+  .scroll-indicator {
+    right: 12px;
+  }
+  
+  .indicator-track {
+    height: 150px;
+  }
+  
+  .coin-counter {
+    font-size: 11px;
+    padding: 3px 6px;
+    min-width: 40px;
+  }
+}
+
+/* Hide scrollbar completely */
+.modern-scroller-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modern-scroller-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* Scroll lock when coin is expanded */
+.modern-scroller-container.scroll-locked {
+  overflow: hidden;
+  scroll-snap-type: none;
+}
+
+.modern-coin-slide.expanded {
+  scroll-snap-align: none;
+}
+
+/* Banner overlay buttons container */
+.banner-overlay-buttons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  pointer-events: none; /* Allow clicks to pass through to banner */
+}
+
+.banner-overlay-buttons .moonfeed-info-button,
+.banner-overlay-buttons .filters-button {
+  pointer-events: auto; /* Re-enable clicks on the buttons themselves */
+}
+
+/* Filter container positioned over banner */
+.banner-filter-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  pointer-events: none; /* Allow clicks to pass through to banner */
+}
+
+.banner-filter-container .filters-button {
+  pointer-events: auto; /* Re-enable clicks on the button itself */
+}

@@ -1,14 +1,17 @@
-.favorites-grid-container {
-  padding: 80px 20px 80px 20px; /* Top padding for potential header, bottom for nav */
+/* Favorites List Container - TikTok-style vertical scrolling */
+.favorites-list-container {
+  padding: 80px 0 80px 0; /* Top padding for header, bottom for nav */
   background: #000000;
   min-height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .favorites-header {
   text-align: center;
   margin-bottom: 32px;
+  padding: 0 20px;
 }
 
 .favorites-header h1 {
@@ -24,86 +27,96 @@
   margin: 0;
 }
 
-.favorites-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 0 4px;
+/* Vertical list instead of grid */
+.favorites-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px;
+  max-width: 600px; /* Limit width for better banner appearance */
+  margin: 0 auto;
 }
 
-/* Desktop - 4 columns max */
-@media (min-width: 1200px) {
-  .favorites-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* Tablet - 3 columns */
-@media (min-width: 768px) and (max-width: 1199px) {
-  .favorites-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-}
-
-/* Mobile - 2 columns */
-@media (max-width: 767px) {
-  .favorites-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  
-  .favorites-grid-container {
-    padding: 60px 12px 80px 12px;
-  }
-  
-  .favorites-header h1 {
-    font-size: 24px;
-  }
-  
-  .favorite-card {
-    padding: 12px;
-  }
-  
-  .chart-container {
-    height: 120px;
-  }
-}
-
-.favorite-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  padding: 16px;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Banner-style cards */
+.favorite-banner {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   cursor: pointer;
+  position: relative;
+  min-height: 120px; /* Reduced height since no chart */
 }
 
-.favorite-card:hover {
+.favorite-banner:hover {
   transform: translateY(-4px);
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-.favorite-card:active {
+.favorite-banner:active {
   transform: translateY(-2px);
   transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Banner Header - Coin info and remove button */
+.banner-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+/* When there's no banner, add more top margin */
+.favorite-banner:not(:has(.banner-image-container)) .banner-header {
+  margin-top: 8px;
+}
+
+.coin-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05); /* Fallback background */
+}
+
+.coin-avatar:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.coin-info {
+  flex: 1;
+}
+
+.coin-symbol {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.coin-name {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+/* Remove button in banner header */
 .remove-favorite-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   background: rgba(0, 0, 0, 0.6);
   color: rgba(255, 255, 255, 0.8);
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   z-index: 10;
@@ -112,6 +125,9 @@
   justify-content: center;
   transition: all 0.2s;
   backdrop-filter: blur(10px);
+  position: relative;
+  flex-shrink: 0; /* Prevent button from shrinking */
+  pointer-events: auto; /* Ensure button is clickable */
 }
 
 .remove-favorite-btn:hover {
@@ -120,6 +136,47 @@
   transform: scale(1.1);
 }
 
+.remove-favorite-btn:active {
+  transform: scale(0.95);
+  background: rgba(226, 85, 123, 1);
+}
+
+/* Banner Stats - Horizontal layout */
+.banner-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-group {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+}
+
+/* Banner Image Container */
+.banner-image-container {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.banner-image:hover {
+  transform: scale(1.02);
+}
+
+/* Old card styles - keep for compatibility until fully replaced */
 .card-header {
   display: flex;
   align-items: center;
@@ -206,18 +263,8 @@
   margin: 0;
 }
 
-.card-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
 .stat {
   text-align: left;
-}
-
-.stat:last-child {
-  grid-column: 1 / -1; /* Market cap spans full width */
 }
 
 .stat-label {
@@ -247,9 +294,6 @@
 }
 
 .graduation-badge {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
   background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-size: 10px;
@@ -257,6 +301,46 @@
   padding: 4px 8px;
   border-radius: 8px;
   backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .favorites-list-container {
+    padding: 60px 0 80px 0;
+  }
+  
+  .favorites-list {
+    padding: 0 16px;
+    gap: 12px;
+  }
+  
+  .favorite-banner {
+    padding: 16px;
+    min-height: 180px;
+  }
+  
+  .favorites-header h1 {
+    font-size: 24px;
+  }
+  
+  .banner-chart {
+    height: 100px;
+  }
+  
+  .stat-group {
+    gap: 16px;
+  }
+  
+  .coin-avatar {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .banner-image-container {
+    height: 100px;
+    margin-bottom: 12px;
+  }
 }
 
 /* Empty state */

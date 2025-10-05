@@ -37,7 +37,7 @@ function BottomNavBar({ activeTab, setActiveTab, onSearchClick }) {
         </span>
         <span className="nav-label">Favorites</span>
       </button>
-      <button className="nav-btn nav-btn-profile" onClick={() => setActiveTab('profile')}>
+      <button className={`nav-btn${activeTab === 'profile' ? ' active' : ''}`} onClick={() => setActiveTab('profile')}>
         <span className="nav-icon">
           {/* User/Profile icon */}
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5"/><path d="M3 17C3 14.2386 6.13401 12 10 12C13.866 12 17 14.2386 17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>

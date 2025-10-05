@@ -1,182 +1,94 @@
 import React from 'react';
-import './AboutModal.css';
 
 const AboutModal = ({ coin, isOpen, onClose, onTradeClick }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="about-modal-overlay" onClick={onClose}>
-      <div className="about-modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="about-modal-header">
-          <div className="coin-info">
-            <img
-              src={coin.image || coin.profilePic || '/placeholder.png'}
-              alt={coin.name}
-              className="coin-image-modal"
-              onError={(e) => {
-                e.target.src = '/placeholder.png';
-              }}
-            />
-            <div>
-              <h2>{coin.name}</h2>
-              <p className="coin-symbol-modal">{coin.symbol || coin.ticker}</p>
-            </div>
-          </div>
-          <button className="close-btn" onClick={onClose}>
-            ✕
+    <div 
+      className="modal-overlay"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }}
+      onClick={onClose}
+    >
+      <div 
+        className="modal-content"
+        style={{
+          backgroundColor: 'white',
+          padding: '24px',
+          borderRadius: '12px',
+          maxWidth: '400px',
+          width: '90%',
+          maxHeight: '80vh',
+          overflow: 'auto'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h2 style={{ margin: 0, fontSize: '20px' }}>About {coin?.name || coin?.symbol}</h2>
+          <button 
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              padding: '4px'
+            }}
+          >
+            ×
           </button>
         </div>
         
-        <div className="about-modal-body">
-          <h3>About {coin.name}</h3>
-          <div className="coin-description-full">
-            {coin.description ? (
-              <p>{coin.description}</p>
-            ) : (
-              <p className="no-description">
-                No description available for this coin.
-              </p>
-            )}
-          </div>
-          
-          {/* Additional coin details */}
-          <div className="coin-details-grid">
-            {coin.priceUsd && (
-              <div className="detail-item">
-                <span className="detail-label">Price:</span>
-                <span className="detail-value">${parseFloat(coin.priceUsd).toFixed(6)}</span>
-              </div>
-            )}
-            {coin.marketCap && (
-              <div className="detail-item">
-                <span className="detail-label">Market Cap:</span>
-                <span className="detail-value">${Number(coin.marketCap).toLocaleString()}</span>
-              </div>
-            )}
-            {coin.volume && (
-              <div className="detail-item">
-                <span className="detail-label">24h Volume:</span>
-                <span className="detail-value">${Number(coin.volume).toLocaleString()}</span>
-              </div>
-            )}
-            {coin.liquidity && (
-              <div className="detail-item">
-                <span className="detail-label">Liquidity:</span>
-                <span className="detail-value">${Number(coin.liquidity).toLocaleString()}</span>
-              </div>
-            )}
-            {coin.createdAt && (
-              <div className="detail-item">
-                <span className="detail-label">Created:</span>
-                <span className="detail-value">{new Date(coin.createdAt).toLocaleDateString()}</span>
-              </div>
-            )}
-            {coin.source && (
-              <div className="detail-item">
-                <span className="detail-label">Source:</span>
-                <span className="detail-value">{coin.source}</span>
-              </div>
-            )}
-            {(coin.mint || coin.tokenAddress) && (
-              <div className="detail-item">
-                <span className="detail-label">Contract:</span>
-                <span 
-                  className="detail-value contract-address" 
-                  title={coin.mint || coin.tokenAddress}
-                  onClick={() => navigator.clipboard.writeText(coin.mint || coin.tokenAddress)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {(coin.mint || coin.tokenAddress).slice(0, 8)}...{(coin.mint || coin.tokenAddress).slice(-8)}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          {/* Social Links if available */}
-          {(() => {
-            const extractSocialFromArray = (socials, type) => {
-              if (!Array.isArray(socials)) return null;
-              if (type === 'website') {
-                const websiteItem = socials.find(item => 
-                  item.label?.toLowerCase() === 'website' || 
-                  item.type?.toLowerCase() === 'website'
-                );
-                return websiteItem?.url || null;
-              }
-              const socialItem = socials.find(item => item.type?.toLowerCase() === type);
-              return socialItem?.url || null;
-            };
-            
-            const twitter = extractSocialFromArray(coin.socials, 'twitter') || 
-                           coin.socials?.twitter || coin.twitter || coin.social?.twitter;
-            
-            const telegram = extractSocialFromArray(coin.socials, 'telegram') || 
-                            coin.socials?.telegram || coin.telegram || coin.social?.telegram;
-            
-            const website = extractSocialFromArray(coin.socials, 'website') || 
-                           coin.socials?.website || coin.website || coin.social?.website || 
-                           coin.url || coin.homepage || coin.websiteUrl || coin.site;
-            
-            const ensureValidUrl = (url) => {
-              if (!url || typeof url !== 'string') return null;
-              url = url.trim();
-              if (!url || url.length < 4) return null;
-              if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                return `https://${url}`;
-              }
-              return url;
-            };
-            
-            const validTwitter = ensureValidUrl(twitter);
-            const validTelegram = ensureValidUrl(telegram);
-            const validWebsite = ensureValidUrl(website);
-            
-            return (
-              <div style={{ marginTop: '24px' }}>
-                {(validTwitter || validTelegram || validWebsite) && (
-                  <>
-                    <h4 style={{ color: '#fff', fontSize: '16px', marginBottom: '12px' }}>Social Links</h4>
-                    <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-                      {validTwitter && (
-                        <a href={validTwitter} target="_blank" rel="noopener noreferrer" 
-                           style={{ color: '#1da1f2', fontSize: '24px', textDecoration: 'none' }} title="Twitter">
-                          🐦
-                        </a>
-                      )}
-                      {validTelegram && (
-                        <a href={validTelegram} target="_blank" rel="noopener noreferrer" 
-                           style={{ color: '#229ED9', fontSize: '24px', textDecoration: 'none' }} title="Telegram">
-                          ✈️
-                        </a>
-                      )}
-                      {validWebsite && (
-                        <a href={validWebsite} target="_blank" rel="noopener noreferrer" 
-                           style={{ color: '#fff', fontSize: '24px', textDecoration: 'none' }} title="Website">
-                          🌐
-                        </a>
-                      )}
-                    </div>
-                  </>
-                )}
-                {/* Small modern Trade button under social links */}
-                <div className="trade-cta-wrapper">
-                  <button
-                    className="trade-cta-btn"
-                    onClick={() => {
-                      if (typeof onTradeClick === 'function') {
-                        onTradeClick(coin);
-                      }
-                      onClose && onClose();
-                    }}
-                    title="Trade this coin"
-                  >
-                    <span style={{ fontSize: 16, marginRight: 8 }}>💸</span>
-                    Trade
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
+        <div style={{ marginBottom: '16px' }}>
+          <p><strong>Symbol:</strong> {coin?.symbol}</p>
+          <p><strong>Name:</strong> {coin?.name}</p>
+          <p><strong>Price:</strong> ${coin?.price_usd?.toFixed(6) || 'N/A'}</p>
+          <p><strong>Market Cap:</strong> ${coin?.market_cap_usd?.toLocaleString() || 'N/A'}</p>
+          <p><strong>24h Volume:</strong> ${coin?.volume_24h_usd?.toLocaleString() || 'N/A'}</p>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => {
+              onTradeClick?.(coin);
+              onClose();
+            }}
+            style={{
+              flex: 1,
+              padding: '12px',
+              backgroundColor: '#4caf50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Trade
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1,
+              padding: '12px',
+              backgroundColor: '#e0e0e0',
+              color: '#333',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

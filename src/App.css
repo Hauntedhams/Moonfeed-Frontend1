@@ -1,15 +1,24 @@
+/* Jupiter Plugin CSS Variables */
+:root {
+  --jupiter-plugin-primary: 199, 242, 132;
+  --jupiter-plugin-background: 0, 0, 0;
+  --jupiter-plugin-primary-text: 232, 249, 255;
+  --jupiter-plugin-warning: 251, 191, 36;
+  --jupiter-plugin-interactive: 33, 42, 54;
+  --jupiter-plugin-module: 16, 23, 31;
+}
+
 #root {
-  width: 100vw;
+  width: 100%;
+  max-width: 430px; /* Phone width */
   height: 100vh;
-  margin: 0;
+  margin: 0 auto; /* Center on larger screens */
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: inherit; /* Inherit from body instead of forcing black */
+  display: block; /* Changed from flex to block */
+  background: linear-gradient(135deg, #0b1220 0%, #0e1426 50%, #0b1220 100%);
   min-height: 100vh;
   box-sizing: border-box;
+  position: relative;
 }
 
 .card {
@@ -44,6 +53,27 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Toast animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 

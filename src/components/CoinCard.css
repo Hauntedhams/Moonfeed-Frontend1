@@ -1,0 +1,1215 @@
+/* =============================================================================
+   COIN CARD - Streamlined Two-Layer TikTok-style Component (CLEAN STYLES)
+   ============================================================================= */
+
+.coin-card {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #0b1220 0%, #0e1426 50%, #0b1220 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: white;
+}
+
+/* =============================================================================
+   BASE LAYER - Static Content (Banner, Profile, Name, Symbol, Description)
+   ============================================================================= */
+
+.coin-banner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.coin-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1;
+}
+
+.coin-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+.banner-placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.05rem;
+  z-index: 2;
+  position: relative;
+  padding: 8px 10px;
+}
+
+.banner-text-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+  padding: 20px;
+  z-index: 10;
+  color: white;
+}
+
+.banner-coin-info {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.banner-coin-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  margin: 0;
+}
+
+.banner-coin-name.clickable-name {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+}
+
+.banner-coin-name.clickable-name:hover {
+  color: #f0f9ff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transform: translateY(-1px);
+}
+
+.banner-coin-name.clickable-name:active {
+  transform: translateY(0);
+}
+
+.banner-coin-symbol {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.banner-lock-indicator {
+  margin-left: 8px;
+}
+
+/* Banner Favorites Button */
+.banner-favorites-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: -2px;
+}
+
+.banner-favorites-button:hover {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+}
+
+.banner-favorites-button.favorited {
+  color: rgba(255, 255, 255, 1);
+}
+
+.banner-favorites-button.favorited:hover {
+  color: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.banner-favorites-button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+/* Adjust stroke width for unfavorited state to make outline more visible */
+.banner-favorites-button:not(.favorited) svg {
+  stroke-width: 2.5;
+}
+
+/* Favorited state uses filled star with thinner stroke */
+.banner-favorites-button.favorited svg {
+  stroke-width: 1.5;
+}
+
+.banner-coin-description {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+
+/* =============================================================================
+   INFO LAYER - Expandable/Scrollable Content
+   ============================================================================= */
+
+.coin-info-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  backdrop-filter: blur(20px);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(0%);
+  height: 70vh;
+  z-index: 25;
+  overflow: hidden;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.coin-info-layer.expanded {
+  transform: translateY(0%);
+  height: calc(100vh - 80px); /* Fill viewport minus bottom nav bar */
+}
+
+.info-layer-header {
+  padding: 16px 20px 8px;
+  background: rgba(255, 255, 255, 0.98);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.expand-handle {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expand-handle::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  border-right: 2px solid rgba(0, 0, 0, 0.6);
+  transform: rotate(-135deg);
+  transition: all 0.2s ease;
+}
+
+.expand-handle:hover::before {
+  border-bottom-color: rgba(0, 0, 0, 0.8);
+  border-right-color: rgba(0, 0, 0, 0.8);
+}
+
+.trade-button {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.trade-button:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.trade-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.coin-info-layer.expanded .expand-handle::before {
+  transform: rotate(45deg);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-social-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  gap: 0px;
+}
+
+.header-social-icons {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: fit-content;
+  padding-right: 0px;
+}
+
+/* Header Metrics Grid - Positioned to the right of social icons */
+.header-metrics-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-behavior: smooth;
+  flex: 1;
+  min-width: 0; /* Allow flexbox to shrink */
+  position: relative;
+  margin-left: 0px; /* No additional space from social icons */
+}
+
+.header-metrics-grid::-webkit-scrollbar {
+  height: 3px;
+}
+
+.header-metrics-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 2px;
+}
+
+.header-metrics-grid::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 2px;
+}
+
+.header-metrics-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.header-metric {
+  background: transparent;
+  border-radius: 0;
+  padding: 6px 12px;
+  text-align: center;
+  border: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  flex: 0 0 90px;
+  min-width: 90px;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: help;
+}
+
+.header-metric:last-child {
+  border-right: none;
+}
+
+.header-metric:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+  border-radius: 6px;
+}
+
+.header-metric-label {
+  font-size: 0.7rem;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-metric-value {
+  font-size: 0.85rem;
+  color: #000000;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* Metric Tooltip Styles */
+.metric-tooltip {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.98);
+  color: #000000;
+  padding: 16px;
+  border-radius: 12px;
+  width: 280px;
+  max-width: 90vw;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  z-index: 10000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.metric-tooltip::before {
+  display: none;
+}
+
+.tooltip-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 6px;
+}
+
+.tooltip-exact {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #22c55e;
+  margin-bottom: 8px;
+  font-family: 'Inter', monospace;
+}
+
+.tooltip-description {
+  font-size: 0.8rem;
+  color: #333333;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.tooltip-example {
+  font-size: 0.75rem;
+  color: #666666;
+  font-style: italic;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  line-height: 1.4;
+}
+
+/* Enhanced hover effect for metrics */
+.header-metric {
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.header-metric:hover {
+  background: rgba(0, 0, 0, 0.02);
+  transform: translateY(-1px);
+  border-radius: 6px;
+}
+
+/* Social Icon Base Styles */
+.header-social-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(0, 0, 0, 0.7);
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.header-social-icon:hover {
+  color: rgba(0, 0, 0, 0.9);
+  background: transparent;
+  transform: scale(1.1);
+}
+
+/* Platform-specific icon styling - unified black and white */
+.header-social-icon.twitter-icon {
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.header-social-icon.twitter-icon:hover {
+  color: rgba(0, 0, 0, 0.9);
+  background: transparent;
+}
+
+.header-social-icon.website-icon {
+  font-size: 22px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.header-social-icon.website-icon:hover {
+  color: rgba(0, 0, 0, 0.9);
+  background: transparent;
+}
+
+.header-social-icon.telegram-icon {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.header-social-icon.telegram-icon:hover {
+  color: rgba(0, 0, 0, 0.9);
+  background: transparent;
+}
+
+.info-layer-profile-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.info-layer-profile-image:hover {
+  transform: scale(1.05);
+  border-color: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.info-layer-profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.info-layer-profile-placeholder {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coin-price {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #000000;
+  text-shadow: none;
+}
+
+.price-change {
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.price-change.positive {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.price-change.negative {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.social-icons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.social-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #000000;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.social-icon:hover {
+  background: rgba(0, 0, 0, 0.15);
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+.info-layer-content {
+  padding: 0 20px 20px;
+  height: calc(100% - 120px);
+  overflow-y: auto;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* =============================================================================
+   SOCIAL LINKS SECTION - Between price and metrics
+   ============================================================================= */
+
+.social-links-section {
+  margin-bottom: 18px;
+  padding-top: 8px;
+}
+
+.social-links-grid {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.coin-info-layer.expanded .info-layer-content {
+  overflow-y: auto;
+  height: calc(100% - 80px); /* Allow scrolling through all content */
+  opacity: 1;
+}
+
+.info-layer-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.info-layer-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 2px;
+}
+
+.info-layer-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 2px;
+}
+
+.info-layer-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* =============================================================================
+   METRICS AND CONTENT SECTIONS
+   ============================================================================= */
+
+.metrics-grid {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-behavior: smooth;
+}
+
+.metrics-grid::-webkit-scrollbar {
+  height: 3px;
+}
+
+.metrics-grid::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 2px;
+}
+
+.metrics-grid::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 2px;
+}
+
+.metrics-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.metric {
+  background: transparent;
+  border-radius: 0;
+  padding: 8px 16px;
+  text-align: center;
+  border: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  flex: 0 0 110px;
+  min-width: 110px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.metric:last-child {
+  border-right: none;
+}
+
+.metric:hover {
+  background: transparent;
+  transform: translateY(-1px);
+}
+
+/* Charts Section with Horizontal Snap Scrolling */
+.charts-section {
+  margin: 24px 0;
+  position: relative;
+}
+
+.charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  margin-bottom: 56px;
+}
+
+.charts-header .section-title {
+  margin: 0;
+  padding: 0;
+}
+
+.chart-labels {
+  display: flex;
+  gap: 12px;
+}
+
+.chart-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.chart-label:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.chart-label.active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.charts-horizontal-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  transform: translateY(-40px);
+  overflow-y: hidden; /* Prevent vertical overflow */
+  position: relative; /* Establish stacking context */
+}
+
+.charts-horizontal-container::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.chart-page {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  padding: 0; /* Removed horizontal padding to allow full width */
+  box-sizing: border-box;
+  min-height: 280px;
+  overflow: hidden; /* Prevent content from bleeding into adjacent pages */
+  position: relative; /* Establish stacking context */
+}
+
+.chart-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.chart-page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.chart-page-indicator {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.clean-chart-wrapper,
+.advanced-chart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+  width: 100%; /* Ensure full width */
+  margin: 0; /* Remove any margins */
+  padding: 0; /* Remove any padding */
+  overflow: hidden; /* Prevent content overflow */
+  position: relative; /* Establish stacking context */
+}
+
+.advanced-chart-wrapper {
+  width: 100%;
+  overflow: hidden; /* Prevent DexScreener iframe from bleeding */
+}
+
+.advanced-chart-wrapper .chart-container,
+.advanced-chart-wrapper .chart-placeholder {
+  width: 100%;
+  min-height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative; /* Contain the iframe */
+}
+
+/* Navigation Dots */
+.chart-nav-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 8px;
+}
+
+.nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.nav-dot.active {
+  background: #fff;
+  transform: scale(1.2);
+}
+
+/* Swipe Hint */
+.swipe-hint {
+  text-align: center;
+  margin-top: 8px;
+  padding: 0 20px;
+}
+
+.swipe-hint span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .chart-page {
+    padding: 0 16px;
+  }
+  
+  .clean-chart-wrapper .clean-price-chart {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.chart-section {
+  margin-bottom: 32px;
+  margin-top: 16px;
+  margin-left: -20px;
+  margin-right: -20px;
+}
+
+.top-traders-section,
+.transactions-section,
+.token-details-section,
+.price-changes-section,
+.activity-section,
+.volume-analysis-section {
+  margin-bottom: 22px;
+}
+
+.section-title {
+  font-size: 1.0rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-container {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  min-height: 280px;
+  height: 320px;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  position: relative;
+  overflow: visible;
+}
+
+.section-content {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-placeholder {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.95rem;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 14px;
+  padding: 60px 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  margin: 0 20px;
+  width: calc(100% - 40px);
+}
+
+.content-placeholder {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* =============================================================================
+   BANNER MODAL - Full screen popup for banner images
+   ============================================================================= */
+
+.banner-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.banner-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: #0c111a;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.banner-modal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  max-width: 80vw;
+  max-height: 70vh;
+}
+
+.banner-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  transition: background-color 0.2s ease;
+}
+
+.banner-modal-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* =============================================================================
+   PROFILE MODAL - Full screen popup for profile images
+   ============================================================================= */
+
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.profile-modal-content {
+  position: relative;
+  background: #0c111a;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+.profile-modal-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto 16px auto;
+  display: block;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  transition: background-color 0.2s ease;
+}
+
+.profile-modal-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.profile-modal-info {
+  padding: 0 20px 20px;
+}
+
+.profile-modal-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.profile-modal-symbol {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* =============================================================================
+   END PROFILE MODAL STYLES
+   ============================================================================= */
+
+/* =============================================================================
+   CHART LOADING ANIMATION
+   ============================================================================= */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+   END BANNER MODAL STYLES
+   ============================================================================= */
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+@media (max-width: 480px) {
+  .coin-profile {
+    padding: 16px;
+  }
+  
+  .coin-name {
+    font-size: 1.6rem;
+  }
+  
+  .coin-price {
+    font-size: 1.7rem;
+  }
+  
+  .metrics-grid {
+    gap: 6px;
+  }
+  
+  .metric {
+    flex: 0 0 95px;
+    min-width: 95px;
+    padding: 6px 12px;
+  }
+  
+  .metric-label {
+    font-size: 0.6rem;
+    margin-bottom: 1px;
+  }
+  
+  .metric-value {
+    font-size: 0.8rem;
+  }
+  
+  .info-layer-header {
+    padding: 12px 16px 8px;
+  }
+  
+  .info-layer-content {
+    padding: 0 16px 16px;
+  }
+}
+
+/* =============================================================================
+   LIQUIDITY LOCK INDICATOR INTEGRATION
+   ============================================================================= */
+
+/* Header metric with stacked lock indicator (only for liquidity) */
+.header-metric-label-with-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 32px;
+  justify-content: flex-end; /* Align to bottom to match other labels */
+}
+
+.header-metric-label-with-icon .liquidity-lock-indicator {
+  margin-bottom: 2px;
+}
+
+.header-metric-label-with-icon .header-metric-label {
+  margin: 0;
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+/* Align all regular metric labels to the same baseline */
+.header-metric .header-metric-label {
+  margin-bottom: 4px; /* Add bottom margin to align with the liquidity label */
+  min-height: 16px; /* Ensure consistent height */
+  display: flex;
+  align-items: flex-end; /* Align text to bottom of the container */
+}
+
+/* Ensure consistent spacing and alignment for all metrics */
+.header-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Make sure the liquidity metric has the same total height */
+.header-metric:has(.header-metric-label-with-icon) {
+  min-width: 80px;
+}
+
+/* Hover effect for the lock indicator */
+.header-metric:hover .liquidity-lock-indicator {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Top Traders Section - Enable horizontal scrolling */
+.top-traders-section .section-content {
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: transparent;
+  border: none;
+  min-height: auto;
+}

@@ -5,9 +5,6 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "framework": "vite",
-  "git": {
-    "deploymentEnabled": false
-  },
   "routes": [
     {
       "src": "/[^.]+",
@@ -16,9 +13,6 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "VITE_API_BASE_URL": "https://moonfeed-backend.onrender.com",
-    "VITE_JUPITER_REFERRAL_ACCOUNT": "42DqmQMZrVeZkP2Btj2cS96Ej81jVxFqwUZWazVvhUPt",
-    "VITE_JUPITER_REFERRAL_FEE_BPS": "70"
+    "NODE_ENV": "production"
   }
 }

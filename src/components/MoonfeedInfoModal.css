@@ -1,0 +1,413 @@
+/* Moonfeed Info Button */
+.moonfeed-info-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: transparent;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 40px;
+  height: 40px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+/* Banner positioned version */
+.moonfeed-info-button.banner-positioned-left {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: auto;
+}
+
+.moonfeed-info-button:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.moonfeed-info-button .moonfeed-logo-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.moonfeed-info-button:hover .moonfeed-logo-image {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+.moonfeed-info-button .moonfeed-logo-fallback {
+  font-size: 20px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Modal Overlay */
+.moonfeed-info-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 2001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Container */
+.moonfeed-info-modal {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Header */
+.moonfeed-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.moonfeed-logo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.moonfeed-logo-header .moonfeed-logo {
+  font-size: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.moonfeed-info-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Modal Content */
+.moonfeed-info-content {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+  /* Add subtle gradient indicators for scrollability */
+  background: 
+    linear-gradient(to bottom, rgba(26, 26, 26, 0) 0%, rgba(26, 26, 26, 0) 90%, rgba(26, 26, 26, 0.3) 100%);
+}
+
+.moonfeed-info-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.moonfeed-info-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.moonfeed-info-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.moonfeed-info-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Info Sections */
+.info-section {
+  margin-bottom: 28px;
+}
+
+.info-section:last-child {
+  margin-bottom: 0;
+}
+
+.info-section h3 {
+  margin: 0 0 16px 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-section p {
+  margin: 0 0 12px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Feature List */
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.feature-icon {
+  font-size: 16px;
+  margin-top: 2px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.feature-item div {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.feature-item strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Tabs Explanation */
+.tabs-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tab-item {
+  padding: 10px 14px;
+  background: rgba(74, 144, 226, 0.1);
+  border: 1px solid rgba(74, 144, 226, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.tab-item strong {
+  color: #4a90e2;
+  font-weight: 600;
+}
+
+/* Warning Box */
+.warning-box {
+  padding: 16px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.warning-box p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warning-box strong {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+/* Modal Footer */
+.moonfeed-info-footer {
+  padding: 20px 24px 24px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  position: relative;
+}
+
+/* Add scroll hint at bottom */
+.moonfeed-info-footer::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+.got-it-button {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.got-it-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+  background: linear-gradient(135deg, #357abd 0%, #2868a3 100%);
+}
+
+.got-it-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .moonfeed-info-modal {
+    margin: 10px;
+    max-height: 90vh;
+  }
+  
+  .moonfeed-info-header,
+  .moonfeed-info-content,
+  .moonfeed-info-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .moonfeed-info-header h2 {
+    font-size: 20px;
+  }
+  
+  .info-section h3 {
+    font-size: 16px;
+  }
+  
+  .feature-item {
+    padding: 10px;
+  }
+  
+  .moonfeed-info-button {
+    top: 15px;
+    left: 15px;
+    padding: 5px 8px;
+    font-size: 9px;
+    gap: 4px;
+    min-height: 22px;
+  }
+  
+  .moonfeed-info-button .moonfeed-logo {
+    font-size: 11px;
+  }
+  
+  .moonfeed-info-button .info-text {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .moonfeed-info-overlay {
+    padding: 0;
+  }
+  
+  .moonfeed-info-modal {
+    border-radius: 0;
+    margin: 0;
+    max-height: 100vh;
+  }
+  
+  .feature-list {
+    gap: 12px;
+  }
+  
+  .feature-item {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}

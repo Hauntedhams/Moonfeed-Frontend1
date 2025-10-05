@@ -1,46 +1,83 @@
 import React, { useState } from 'react';
 import './CoinSearchModal.css';
 
-function CoinSearchModal({ visible, onClose, onCoinFound }) {
+function resolveApiBase() {
+  const explicit = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+  if (explicit && explicit.trim().length > 0) return explicit.replace(/\/$/, '');
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://moonfeed-backend.onrender.com';
+    }
+  }
+  return 'http://localhost:3001';
+}
+
+function CoinSearchModal({ visible, onClose, onCoinSelect }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchResult, setSearchResult] = useState(null);
 
+  // Use same base resolution as TokenScroller
+  const API_ROOT = resolveApiBase();
+  const CURATED_URL = `${API_ROOT}/api/coins/curated`;
+
   // Handle search input
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    
+    const cleanQuery = searchQuery.trim();
+
     setLoading(true);
     setError(null);
     setSearchResult(null);
-    
+
     try {
-      // More flexible validation - just check if it looks like an address
-      const cleanQuery = searchQuery.trim();
-      
-      if (cleanQuery.length < 32 || cleanQuery.length > 50) {
-        throw new Error('Please enter a valid token address (32-50 characters)');
+      // Simple validation: token address-like string
+      if (cleanQuery.length < 20 || cleanQuery.length > 100) {
+        throw new Error('Please enter a valid token address (20-100 characters)');
       }
 
-      // Fetch coin data from your backend
-      const response = await fetch(`/api/search-coin?address=${encodeURIComponent(cleanQuery)}`);
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Token not found. Please check the address and try again.');
-        } else if (response.status === 400) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Invalid token address format');
+      console.log('🔍 Searching for token:', cleanQuery);
+
+      // First, try to find in curated coins
+      const curatedResponse = await fetch(CURATED_URL);
+      if (curatedResponse.ok) {
+        const curatedData = await curatedResponse.json();
+        const coins = Array.isArray(curatedData?.coins) ? curatedData.coins : [];
+
+        const found = coins.find(c =>
+          (c.tokenAddress && c.tokenAddress.toLowerCase() === cleanQuery.toLowerCase()) ||
+          (c.mintAddress && c.mintAddress.toLowerCase() === cleanQuery.toLowerCase()) ||
+          (c.id && c.id.toLowerCase() === cleanQuery.toLowerCase())
+        );
+
+        if (found) {
+          console.log('✅ Found in curated list:', found.symbol);
+          setSearchResult(found);
+          return;
         }
-        throw new Error('Failed to search for token. Please try again.');
       }
+
+      // If not found in curated list, try individual coin lookup
+      console.log('🔍 Not in curated list, trying external lookup...');
+      const individualResponse = await fetch(`${API_ROOT}/api/coin/${cleanQuery}`);
       
-      const coinData = await response.json();
-      setSearchResult(coinData);
-      
+      if (individualResponse.ok) {
+        const individualData = await individualResponse.json();
+        if (individualData.success && individualData.coin) {
+          console.log('✅ Found via external lookup:', individualData.coin.symbol);
+          setSearchResult(individualData.coin);
+          return;
+        }
+      }
+
+      // If all methods fail
+      throw new Error('Token not found. Please check the address and try again.');
+
     } catch (err) {
-      setError(err.message);
+      console.error('❌ Search error:', err);
+      setError(err.message || 'Search failed');
     } finally {
       setLoading(false);
     }
@@ -48,7 +85,7 @@ function CoinSearchModal({ visible, onClose, onCoinFound }) {
 
   // Handle clicking on search result
   const handleResultClick = (coinData) => {
-    onCoinFound(coinData);
+    if (onCoinSelect) onCoinSelect(coinData);
     setSearchQuery('');
     setSearchResult(null);
     setError(null);
@@ -80,6 +117,10 @@ function CoinSearchModal({ visible, onClose, onCoinFound }) {
         </div>
         
         <div className="search-modal-body">
+          <div className="search-coming-soon-banner" role="note" aria-label="Search enhancements">
+            <span className="coming-dot" />
+            <span className="coming-text">✨ Enhanced search now supports any Solana token address!</span>
+          </div>
           <div className="search-input-container">
             <input
               type="text"
@@ -124,8 +165,8 @@ function CoinSearchModal({ visible, onClose, onCoinFound }) {
               <div className="search-result-card" onClick={() => handleResultClick(searchResult)}>
                 <div className="search-result-image">
                   <img 
-                    src={searchResult.image || searchResult.profilePic || '/default-coin.png'} 
-                    alt={searchResult.name}
+                    src={searchResult.image || searchResult.profilePic || searchResult.profileImage || searchResult.profile || searchResult.logo || '/default-coin.png'} 
+                    alt={searchResult.name || searchResult.symbol}
                     onError={(e) => {
                       e.target.src = '/default-coin.png';
                     }}
@@ -133,15 +174,19 @@ function CoinSearchModal({ visible, onClose, onCoinFound }) {
                 </div>
                 <div className="search-result-info">
                   <div className="search-result-header">
-                    <h4 className="search-result-name">{searchResult.name}</h4>
-                    <span className="search-result-symbol">${searchResult.symbol}</span>
+                    <h4 className="search-result-name">{searchResult.name || 'Unknown Token'}</h4>
+                    <span className="search-result-symbol">${searchResult.symbol || 'UNKNOWN'}</span>
                   </div>
                   <div className="search-result-details">
                     <div className="search-result-price">
-                      ${searchResult.priceUsd ? Number(searchResult.priceUsd).toFixed(8) : '0.00000000'}
+                      ${searchResult.priceUsd || searchResult.price_usd ? 
+                        Number(searchResult.priceUsd || searchResult.price_usd).toFixed(8) : 
+                        '0.00000000'}
                     </div>
                     <div className="search-result-market-cap">
-                      MC: ${searchResult.marketCap ? (searchResult.marketCap / 1000000).toFixed(2) + 'M' : 'N/A'}
+                      MC: ${searchResult.marketCap || searchResult.market_cap_usd ? 
+                        ((searchResult.marketCap || searchResult.market_cap_usd) / 1000000).toFixed(2) + 'M' : 
+                        'N/A'}
                     </div>
                   </div>
                   {searchResult.description && (
@@ -164,9 +209,10 @@ function CoinSearchModal({ visible, onClose, onCoinFound }) {
           <div className="search-help">
             <h4>How to search:</h4>
             <ul>
-              <li>Enter a valid Solana token address</li>
-              <li>The address should be 32-44 characters long</li>
+              <li>Enter any valid Solana token address (20-100 characters)</li>
+              <li>We'll search our curated feed first, then external sources</li>
               <li>Example: So11111111111111111111111111111111111111112 (Wrapped SOL)</li>
+              <li>Supports tokens from DexScreener, Pump.fun, and other sources</li>
             </ul>
           </div>
         </div>

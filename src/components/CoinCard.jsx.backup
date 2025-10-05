@@ -1,0 +1,844 @@
+import React, { memo, useState } from 'react';
+import './CoinCard.css';
+import AboutModal from './AboutModal';
+
+const CoinCard = memo(({ 
+  coin, 
+  isFavorite, 
+  onFavoriteToggle, 
+  onTradeClick, 
+  isTrending,
+  onExpandChange, // Callback to notify parent about expand state changes
+  isVisible = true // Whether this card is currently visible (for live updates)
+}) => {
+  const [copyMessage, setCopyMessage] = useState('');
+  const [bannerError, setBannerError] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+
+  // Single formatNumber function - no duplicates
+  const formatNumber = (num) => {
+    if (!num || isNaN(num)) return '0';
+    const number = Number(num);
+    if (number >= 1000000000) {
+      return (number / 1000000000).toFixed(1) + 'B';
+    }
+    if (number >= 1000000) {
+      return (number / 1000000).toFixed(1) + 'M';
+    }
+    if (number >= 1000) {
+      return (number / 1000).toFixed(1) + 'K';
+    }
+    return number.toLocaleString();
+  };
+
+  // Format price with proper decimals
+  const formatPrice = (price) => {
+    if (!price || isNaN(price)) return '0.00';
+    const num = Number(price);
+    if (num < 0.00001) return num.toFixed(8);
+    if (num < 0.001) return num.toFixed(6);
+    if (num < 1) return num.toFixed(4);
+    return num.toFixed(2);
+  };
+
+  // Handle expand state changes
+  const handleExpandToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const newState = !isExpanded;
+    setIsExpanded(newState);
+    
+    // Enable scrolling after animation when expanding
+    if (newState) {
+      setTimeout(() => setIsScrollable(true), 400);
+    } else {
+      setIsScrollable(false);
+    }
+    
+    // Notify parent
+    if (onExpandChange) {
+      onExpandChange(newState);
+    }
+  };
+
+  // Prevent scroll propagation when scrolling in expanded content
+  const handleContentScroll = (e) => {
+    if (isScrollable) {
+      e.stopPropagation();
+    }
+  };
+
+  // Handle copy address functionality
+  const handleCopyAddress = async (e) => {
+    e.stopPropagation();
+    const address = coin.tokenAddress || coin.mintAddress || coin.mint || coin.address || coin.ca || coin.id;
+    
+    if (!address || address === 'unknown') {
+      setCopyMessage('No address available');
+      setTimeout(() => setCopyMessage(''), 2000);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopyMessage('Address copied!');
+      setTimeout(() => setCopyMessage(''), 2000);
+    } catch (err) {
+      setCopyMessage('Failed to copy');
+      setTimeout(() => setCopyMessage(''), 2000);
+    }
+  };
+
+  // Calculate price change for display
+  const priceChange = coin.priceChange24h || coin.change24h || 0;
+  const priceChangeDisplay = priceChange > 0 ? `+${priceChange.toFixed(2)}%` : `${priceChange.toFixed(2)}%`;
+  const priceChangeColor = priceChange >= 0 ? '#4caf50' : '#f44336';
+
+  // Generate dynamic banner gradient based on coin data
+  const generateBannerGradient = () => {
+    // Use coin name hash to generate consistent colors for each coin
+    const coinName = (coin.name || coin.symbol || '').toLowerCase();
+    const hash = coinName.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    // Generate hue based on hash
+    const hue = Math.abs(hash) % 360;
+    const saturation = 60 + (Math.abs(hash) % 30); // 60-90%
+    const lightness = 45 + (Math.abs(hash) % 20); // 45-65%
+    
+    return `linear-gradient(135deg, 
+      hsl(${hue}, ${saturation}%, ${lightness}%) 0%, 
+      hsl(${(hue + 30) % 360}, ${saturation + 10}%, ${lightness - 10}%) 50%, 
+      hsl(${(hue + 60) % 360}, ${saturation}%, ${lightness + 5}%) 100%)`;
+  };
+
+  // Handle copying coin name/address
+  const handleCopyName = async (e) => {
+    e.stopPropagation();
+    
+    // Try multiple fields in priority order (backend uses mintAddress)
+    const address = coin.tokenAddress || coin.mintAddress || coin.mint || coin.address || coin.ca || coin.id;
+    
+    if (!address || address === 'unknown') {
+      setCopyMessage('No address available');
+      setTimeout(() => setCopyMessage(''), 2000);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopyMessage(`${coin.name} address copied!`);
+      setTimeout(() => setCopyMessage(''), 2000);
+    } catch (err) {
+      setCopyMessage('Failed to copy address');
+      setTimeout(() => setCopyMessage(''), 2000);
+    }
+  };
+
+  // Use actual coin banner data or generate gradient
+  const bannerUrl = coin.banner || generateBannerGradient();
+  const isGradientBanner = !coin.banner;
+
+  return (
+    <div className="coin-card">
+      {/* Banner */}
+      <div className="coin-banner">
+        {coin.banner || coin.bannerImage || coin.header ? (
+          <img 
+            src={coin.banner || coin.bannerImage || coin.header} 
+            alt={coin.name}
+            onError={() => setBannerError(true)}
+          />
+        ) : (
+          <div className="banner-placeholder">
+            No Banner
+          </div>
+        )}
+      </div>
+
+      {/* Profile Section */}
+      <div className="coin-profile">
+        <div className="profile-image">
+          {coin.image || coin.profileImage || coin.logo ? (
+            <img
+              src={coin.image || coin.profileImage || coin.logo}
+              alt={coin.name}
+              onError={(e) => { e.target.src = '/profile-placeholder.png'; }}
+            />
+          ) : (
+            <div className="profile-placeholder">
+              {coin.name?.charAt(0) || 'M'}
+            </div>
+          )}
+        </div>
+        
+        <h2 className="coin-name">{coin.name || 'Unknown Token'}</h2>
+        <p className="coin-symbol">{coin.symbol || coin.ticker || 'N/A'}</p>
+        {coin.description && (
+          <p className="coin-description">{coin.description}</p>
+        )}
+      </div>
+
+      {/* Info Layer - Expandable */}
+      <div className={`coin-info-layer ${isExpanded ? 'expanded' : ''}`}>
+        <div className="info-layer-header">
+          <div 
+            className="expand-handle"
+            onClick={() => setIsExpanded(!isExpanded)}
+          />
+          
+          <div className="price-section">
+            <div className="coin-price">
+              ${formatNumber(coin.price_usd || coin.priceUsd || coin.price || 0)}
+            </div>
+            <div className={`price-change ${(coin.change_24h || coin.priceChange24h || 0) >= 0 ? 'positive' : 'negative'}`}>
+              {(coin.change_24h || coin.priceChange24h || 0) >= 0 ? '+' : ''}
+              {formatNumber(coin.change_24h || coin.priceChange24h || 0)}%
+            </div>
+          </div>
+          
+          <div className="social-icons">
+            {coin.twitter && (
+              <a href={coin.twitter} target="_blank" rel="noopener noreferrer" className="social-icon">
+                𝕏
+              </a>
+            )}
+            {coin.telegram && (
+              <a href={coin.telegram} target="_blank" rel="noopener noreferrer" className="social-icon">
+                📱
+              </a>
+            )}
+            {coin.website && (
+              <a href={coin.website} target="_blank" rel="noopener noreferrer" className="social-icon">
+                🌐
+              </a>
+            )}
+          </div>
+        </div>
+
+        <div className="info-layer-content">
+          {/* Metrics Grid */}
+          <div className="metrics-grid">
+            <div className="metric">
+              <div className="metric-label">Market Cap</div>
+              <div className="metric-value">${formatNumber(coin.market_cap || coin.marketCap || 0)}</div>
+            </div>
+            <div className="metric">
+              <div className="metric-label">Volume</div>
+              <div className="metric-value">${formatNumber(coin.volume_24h || coin.volume24h || 0)}</div>
+            </div>
+            <div className="metric">
+              <div className="metric-label">Liquidity</div>
+              <div className="metric-value">${formatNumber(coin.liquidity || coin.liquidityUsd || 0)}</div>
+            </div>
+            <div className="metric">
+              <div className="metric-label">Holders</div>
+              <div className="metric-value">{formatNumber(coin.holders || 0)}</div>
+            </div>
+          </div>
+
+          {/* Chart Section */}
+          <div className="chart-section">
+            <h3 className="section-title">📈 Price Chart</h3>
+            <div className="chart-container">
+              <div className="chart-placeholder">Chart will be integrated here</div>
+            </div>
+          </div>
+
+          {/* Top Traders */}
+          <div className="top-traders-section">
+            <h3 className="section-title">🏆 Top Traders</h3>
+            <div className="section-content">
+              <div className="content-placeholder">Top traders data coming soon</div>
+            </div>
+          </div>
+
+          {/* Transactions */}
+          <div className="transactions-section">
+            <h3 className="section-title">💸 Recent Transactions</h3>
+            <div className="section-content">
+              <div className="content-placeholder">Transaction history coming soon</div>
+            </div>
+          </div>
+
+          {/* Token Details */}
+          <div className="token-details-section">
+            <h3 className="section-title">🔍 Token Details</h3>
+            <div className="section-content">
+              <div className="content-placeholder">
+                <p>Contract: {coin.contract_address || coin.mint || 'N/A'}</p>
+                <p>Chain: {coin.chain || 'Solana'}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Price Changes */}
+          <div className="price-changes-section">
+            <h3 className="section-title">📊 Price Changes</h3>
+            <div className="section-content">
+              <div className="content-placeholder">Price change analytics coming soon</div>
+            </div>
+          </div>
+
+          {/* Activity */}
+          <div className="activity-section">
+            <h3 className="section-title">⚡ Activity</h3>
+            <div className="section-content">
+              <div className="content-placeholder">Activity feed coming soon</div>
+            </div>
+          </div>
+
+          {/* Volume Analysis */}
+          <div className="volume-analysis-section">
+            <h3 className="section-title">📈 Volume Analysis</h3>
+            <div className="section-content">
+              <div className="content-placeholder">Volume analysis coming soon</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+CoinCard.displayName = 'CoinCard';
+
+export default CoinCard;
+          {/* Coin icon and price */}
+          <div className="price-display-row">
+            <div className="price-content">
+              <div className="small-coin-icon">
+                <img
+                  src={coin.image || coin.profileImage || coin.logo || '/placeholder.png'}
+                  alt={coin.name}
+                  onError={(e) => { e.target.src = '/placeholder.png'; }}
+                />
+              </div>
+              <div className="price-info">
+                <div className="coin-price-large">
+                  ${coin.price_usd 
+                    ? (parseFloat(coin.price_usd) < 0.01 
+                      ? parseFloat(coin.price_usd).toFixed(6) 
+                      : parseFloat(coin.price_usd).toFixed(4))
+                    : '0.00'}
+                </div>
+                <div 
+                  className="coin-change-percent" 
+                  style={{ color: priceChange >= 0 ? '#10b981' : '#ef4444' }}
+                >
+                  {priceChangeDisplay}
+                </div>
+              </div>
+            </div>
+            
+            {/* Expand Arrow Button - moved next to price */}
+            <button 
+              className={`expand-arrow-button ${isExpanded ? 'expanded' : ''}`}
+              onClick={handleExpandToggle}
+              aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+            >
+              <svg 
+                className={`expand-arrow ${isExpanded ? 'rotated' : ''}`}
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="3"
+              >
+                <polyline points="18,15 12,9 6,15"></polyline>
+              </svg>
+            </button>
+          </div>
+          
+          {/* Social Icons - Always show the container */}
+          <div className="social-icons-small">
+            {/* Debug log for social links */}
+            {(() => {
+              console.log('Social links for', coin.name, ':', {
+                socialLinks: coin.socialLinks,
+                socials: coin.socials,
+                twitter: coin.twitter,
+                telegram: coin.telegram,
+                website: coin.website
+              });
+              return null;
+            })()}
+            
+            {/* Twitter/X */}
+            {(coin.socialLinks?.twitter || coin.socials?.twitter || coin.twitter || coin.twitterUrl) && (
+              <button className="social-icon-circle twitter" onClick={() => {
+                const twitterUrl = coin.socialLinks?.twitter || coin.socials?.twitter || coin.twitter || coin.twitterUrl;
+                window.open(twitterUrl, '_blank');
+              }} title="Twitter/X">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </button>
+            )}
+            
+            {/* Telegram */}
+            {(coin.socialLinks?.telegram || coin.socials?.telegram || coin.telegram || coin.telegramUrl) && (
+              <button className="social-icon-circle telegram" onClick={() => {
+                const telegramUrl = coin.socialLinks?.telegram || coin.socials?.telegram || coin.telegram || coin.telegramUrl;
+                window.open(telegramUrl, '_blank');
+              }} title="Telegram">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-1.268 8.938-.157.936-.465 1.25-.765 1.283-.649.071-1.142-.429-1.768-.84-.979-.643-1.529-1.043-2.476-1.67-1.095-.724-.385-1.122.239-1.773.163-.17 2.988-2.74 3.044-2.976a.22.22 0 0 0-.05-.202c-.013-.012-.032-.018-.05-.022-.012-.003-.025-.003-.037-.001-.013.002-.025.007-.037.014l-4.05 2.53c-.393.265-.752.398-1.077.398-.319 0-.918-.18-1.353-.329-.533-.183-.956-.285-.918-.602.02-.164.16-.325.42-.483.672-.41 11.955-4.012 11.955-4.012s.424-.149.687-.149c.177 0 .35.05.464.149.114.099.177.235.177.384-.001.16-.013.319-.026.478z"/>
+                </svg>
+              </button>
+            )}
+            
+            {/* Website */}
+            {(coin.socialLinks?.website || coin.socials?.website || coin.website || coin.websiteUrl) && (
+              <button className="social-icon-circle website" onClick={() => {
+                const websiteUrl = coin.socialLinks?.website || coin.socials?.website || coin.website || coin.websiteUrl;
+                window.open(websiteUrl, '_blank');
+              }} title="Website">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+              </button>
+            )}
+            
+            {/* Show placeholder icons if no social links available - for testing */}
+            {!((coin.socialLinks?.twitter || coin.socials?.twitter || coin.twitter || coin.twitterUrl) ||
+               (coin.socialLinks?.telegram || coin.socials?.telegram || coin.telegram || coin.telegramUrl) ||
+               (coin.socialLinks?.website || coin.socials?.website || coin.website || coin.websiteUrl)) && (
+              <>
+                {/* Demo icons to show the functionality */}
+                <button className="social-icon-circle twitter" onClick={() => {
+                  console.log('Demo Twitter clicked');
+                }} title="Twitter (Demo)">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </button>
+                <button className="social-icon-circle telegram" onClick={() => {
+                  console.log('Demo Telegram clicked');
+                }} title="Telegram (Demo)">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-1.268 8.938-.157.936-.465 1.25-.765 1.283-.649.071-1.142-.429-1.768-.84-.979-.643-1.529-1.043-2.476-1.67-1.095-.724-.385-1.122.239-1.773.163-.17 2.988-2.74 3.044-2.976a.22.22 0 0 0-.05-.202c-.013-.012-.032-.018-.05-.022-.012-.003-.025-.003-.037-.001-.013.002-.025.007-.037.014l-4.05 2.53c-.393.265-.752.398-1.077.398-.319 0-.918-.18-1.353-.329-.533-.183-.956-.285-.918-.602.02-.164.16-.325.42-.483.672-.41 11.955-4.012 11.955-4.012s.424-.149.687-.149c.177 0 .35.05.464.149.114.099.177.235.177.384-.001.16-.013.319-.026.478z"/>
+                  </svg>
+                </button>
+                <button className="social-icon-circle website" onClick={() => {
+                  console.log('Demo Website clicked');
+                }} title="Website (Demo)">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        <div className="stats-row">
+          {/* Quick Stats */}
+          <div className="quick-stats-inline">
+            <div className="quick-stat">
+              <span className="quick-stat-label">Liquidity</span>
+              <span className="quick-stat-value">${coin.liquidity_usd ? Number(coin.liquidity_usd).toLocaleString() : '0'}</span>
+            </div>
+            <div className="quick-stat">
+              <span className="quick-stat-label">Market Cap</span>
+              <span className="quick-stat-value">${coin.market_cap_usd ? Number(coin.market_cap_usd).toLocaleString() : '0'}</span>
+            </div>
+            <div className="quick-stat">
+              <span className="quick-stat-label">Volume</span>
+              <span className="quick-stat-value">${coin.volume_24h_usd ? Number(coin.volume_24h_usd).toLocaleString() : '0'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* DexScreener Chart - Always visible */}
+        {(coin.mintAddress || coin.tokenAddress || coin.address) && (
+          <div className="chart-container">
+            <iframe
+              src={`https://dexscreener.com/solana/${coin.mintAddress || coin.tokenAddress || coin.address}?embed=1&theme=dark`}
+              className="dexscreener-embed"
+              style={{
+                width: '100%',
+                height: '300px',
+                border: 'none',
+                borderRadius: '12px',
+                pointerEvents: isExpanded ? 'auto' : 'none',
+              }}
+              title="DexScreener Chart"
+            />
+            {!isExpanded && (
+              <div className="chart-overlay">
+                <div className="chart-hint">
+                  <span>📈</span>
+                  <span>Tap expand to interact with chart</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Main Content Area - slides up when expanded */}
+        <div 
+          className={`main-content-area ${isExpanded ? 'expanded' : 'collapsed'}`}
+          ref={expandedContentRef}
+          onScroll={handleExpandedContentScroll}
+          onWheel={handleExpandedContentScroll}
+          onTouchMove={handleExpandedContentScroll}
+        >
+          {/* Chart Interaction Info - only show when expanded */}
+          {isExpanded && (
+            <div className="chart-interaction-info">
+              <p>📈 Chart above is now interactive - scroll and zoom to explore price history</p>
+            </div>
+          )}
+
+          {/* Enhanced Metrics Row */}
+          <div className="enhanced-metrics-grid">
+            <div className="enhanced-metric">
+              <span className="enhanced-metric-label">Liquidity</span>
+              <span className="enhanced-metric-value">
+                ${coin.liquidity_usd ? Number(coin.liquidity_usd).toLocaleString() : '0'}
+              </span>
+            </div>
+            <div className="enhanced-metric">
+              <span className="enhanced-metric-label">Market Cap</span>
+              <span className="enhanced-metric-value">
+                ${coin.market_cap_usd ? Number(coin.market_cap_usd).toLocaleString() : '0'}
+              </span>
+            </div>
+            <div className="enhanced-metric">
+              <span className="enhanced-metric-label">Volume</span>
+              <span className="enhanced-metric-value">
+                ${coin.volume_24h_usd ? Number(coin.volume_24h_usd).toLocaleString() : '0'}
+              </span>
+            </div>
+          </div>
+
+          {/* Top Traders Section */}
+          <div className="panel-section">
+            <h3>🏆 Top Traders</h3>
+            <div className="top-traders-list">
+              <div className="trader-item">
+                <span className="trader-rank">#1</span>
+                <span className="trader-address">7xKX...8gM2</span>
+                <span className="trader-pnl positive">+187.3%</span>
+              </div>
+              <div className="trader-item">
+                <span className="trader-rank">#2</span>
+                <span className="trader-address">9bVq...4jL8</span>
+                <span className="trader-pnl positive">+134.7%</span>
+              </div>
+              <div className="trader-item">
+                <span className="trader-rank">#3</span>
+                <span className="trader-address">3nRt...9kP4</span>
+                <span className="trader-pnl positive">+89.2%</span>
+              </div>
+              <div className="trader-item">
+                <span className="trader-rank">#4</span>
+                <span className="trader-address">5mQw...2vX7</span>
+                <span className="trader-pnl negative">-23.4%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Transactions Section */}
+          <div className="panel-section">
+            <h3>⚡ Recent Transactions</h3>
+            <div className="transactions-list">
+              <div className="transaction-item buy">
+                <span className="tx-type">BUY</span>
+                <span className="tx-amount">$2,450</span>
+                <span className="tx-time">2m ago</span>
+              </div>
+              <div className="transaction-item sell">
+                <span className="tx-type">SELL</span>
+                <span className="tx-amount">$1,200</span>
+                <span className="tx-time">5m ago</span>
+              </div>
+              <div className="transaction-item buy">
+                <span className="tx-type">BUY</span>
+                <span className="tx-amount">$890</span>
+                <span className="tx-time">8m ago</span>
+              </div>
+              <div className="transaction-item buy">
+                <span className="tx-type">BUY</span>
+                <span className="tx-amount">$3,200</span>
+                <span className="tx-time">12m ago</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Token Details Section */}
+          <div className="panel-section">
+            <h3>📊 Token Details</h3>
+            <div className="token-details-grid">
+              <div className="token-detail-item">
+                <span className="token-detail-label">Holders</span>
+                <span className="token-detail-value">{coin.holders || '1,247'}</span>
+              </div>
+              <div className="token-detail-item">
+                <span className="token-detail-label">24h Transactions</span>
+                <span className="token-detail-value">{coin.txCount24h || '892'}</span>
+              </div>
+              <div className="token-detail-item">
+                <span className="token-detail-label">Created</span>
+                <span className="token-detail-value">
+                  {coin.createdAt ? new Date(coin.createdAt).toLocaleDateString() : '2 days ago'}
+                </span>
+              </div>
+              <div className="token-detail-item">
+                <span className="token-detail-label">Contract</span>
+                <span 
+                  className="token-detail-value contract-address" 
+                  onClick={handleCopyAddress}
+                  title="Click to copy address"
+                >
+                  {coin.tokenAddress || coin.mintAddress ? 
+                    `${(coin.tokenAddress || coin.mintAddress).slice(0, 6)}...${(coin.tokenAddress || coin.mintAddress).slice(-4)}` 
+                    : 'Click to copy'
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Multiple Timeframe Price Changes */}
+          <div className="panel-section">
+            <h3>📈 Price Changes</h3>
+            <div className="price-changes-grid">
+              <div className="change-item">
+                <span className="change-label">5m</span>
+                <span className={`change-value ${(coin.dexscreener?.priceChanges?.change5m || 0) >= 0 ? 'positive' : 'negative'}`}>
+                  {coin.dexscreener?.priceChanges?.change5m ? 
+                    `${coin.dexscreener.priceChanges.change5m > 0 ? '+' : ''}${coin.dexscreener.priceChanges.change5m.toFixed(2)}%` 
+                    : 'N/A'
+                  }
+                </span>
+              </div>
+              <div className="change-item">
+                <span className="change-label">1h</span>
+                <span className={`change-value ${(coin.dexscreener?.priceChanges?.change1h || 0) >= 0 ? 'positive' : 'negative'}`}>
+                  {coin.dexscreener?.priceChanges?.change1h ? 
+                    `${coin.dexscreener.priceChanges.change1h > 0 ? '+' : ''}${coin.dexscreener.priceChanges.change1h.toFixed(2)}%` 
+                    : 'N/A'
+                  }
+                </span>
+              </div>
+              <div className="change-item">
+                <span className="change-label">6h</span>
+                <span className={`change-value ${(coin.dexscreener?.priceChanges?.change6h || 0) >= 0 ? 'positive' : 'negative'}`}>
+                  {coin.dexscreener?.priceChanges?.change6h ? 
+                    `${coin.dexscreener.priceChanges.change6h > 0 ? '+' : ''}${coin.dexscreener.priceChanges.change6h.toFixed(2)}%` 
+                    : 'N/A'
+                  }
+                </span>
+              </div>
+              <div className="change-item">
+                <span className="change-label">24h</span>
+                <span className={`change-value ${(coin.dexscreener?.priceChanges?.change24h || priceChange || 0) >= 0 ? 'positive' : 'negative'}`}>
+                  {coin.dexscreener?.priceChanges?.change24h ? 
+                    `${coin.dexscreener.priceChanges.change24h > 0 ? '+' : ''}${coin.dexscreener.priceChanges.change24h.toFixed(2)}%` 
+                    : priceChangeDisplay
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Transaction Activity */}
+          <div className="panel-section">
+            <h3>⚡ Transaction Activity</h3>
+            <div className="transaction-activity-grid">
+              <div className="activity-timeframe">
+                <div className="timeframe-header">5 Minutes</div>
+                <div className="activity-stats">
+                  <div className="activity-stat buy">
+                    <span className="stat-label">Buys</span>
+                    <span className="stat-value">{coin.dexscreener?.transactions?.buys5m || 0}</span>
+                  </div>
+                  <div className="activity-stat sell">
+                    <span className="stat-label">Sells</span>
+                    <span className="stat-value">{coin.dexscreener?.transactions?.sells5m || 0}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="activity-timeframe">
+                <div className="timeframe-header">1 Hour</div>
+                <div className="activity-stats">
+                  <div className="activity-stat buy">
+                    <span className="stat-label">Buys</span>
+                    <span className="stat-value">{coin.dexscreener?.transactions?.buys1h || 0}</span>
+                  </div>
+                  <div className="activity-stat sell">
+                    <span className="stat-label">Sells</span>
+                    <span className="stat-value">{coin.dexscreener?.transactions?.sells1h || 0}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="activity-timeframe">
+                <div className="timeframe-header">24 Hours</div>
+                <div className="activity-stats">
+                  <div className="activity-stat buy">
+                    <span className="stat-label">Buys</span>
+                    <span className="stat-value">{coin.dexscreener?.transactions?.buys24h || coin.buys || 0}</span>
+                  </div>
+                  <div className="activity-stat sell">
+                    <span className="stat-label">Sells</span>
+                    <span className="stat-value">{coin.dexscreener?.transactions?.sells24h || coin.sells || 0}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Volume Analysis */}
+          <div className="panel-section">
+            <h3>💰 Volume Analysis</h3>
+            <div className="volume-analysis-grid">
+              <div className="volume-item">
+                <span className="volume-label">5m Volume</span>
+                <span className="volume-value">${formatNumber(coin.dexscreener?.volumes?.volume5m || 0)}</span>
+              </div>
+              <div className="volume-item">
+                <span className="volume-label">1h Volume</span>
+                <span className="volume-value">${formatNumber(coin.dexscreener?.volumes?.volume1h || 0)}</span>
+              </div>
+              <div className="volume-item">
+                <span className="volume-label">6h Volume</span>
+                <span className="volume-value">${formatNumber(coin.dexscreener?.volumes?.volume6h || 0)}</span>
+              </div>
+              <div className="volume-item">
+                <span className="volume-label">24h Volume</span>
+                <span className="volume-value">${formatNumber(coin.dexscreener?.volumes?.volume24h || coin.volume_24h_usd || 0)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pool Information */}
+          {coin.dexscreener?.poolInfo && (
+            <div className="panel-section">
+              <h3>🏊 Pool Information</h3>
+              <div className="pool-info-grid">
+                <div className="pool-info-item">
+                  <span className="pool-info-label">Pool Age</span>
+                  <span className="pool-info-value">
+                    {coin.dexscreener.poolInfo.ageDays ? 
+                      `${coin.dexscreener.poolInfo.ageDays}d ${coin.dexscreener.poolInfo.ageHours % 24}h` 
+                      : 'Unknown'
+                    }
+                  </span>
+                </div>
+                <div className="pool-info-item">
+                  <span className="pool-info-label">Pool Type</span>
+                  <span className="pool-info-value">
+                    {coin.dexscreener.poolInfo.labels?.join(', ') || 'Standard'}
+                    {coin.dexscreener.poolInfo.isNew && <span className="new-badge">NEW</span>}
+                  </span>
+                </div>
+                <div className="pool-info-item">
+                  <span className="pool-info-label">Base Liquidity</span>
+                  <span className="pool-info-value">{formatNumber(coin.dexscreener.liquidityDetails?.base || 0)}</span>
+                </div>
+                <div className="pool-info-item">
+                  <span className="pool-info-label">Quote Liquidity</span>
+                  <span className="pool-info-value">{formatNumber(coin.dexscreener.liquidityDetails?.quote || 0)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Market Metrics */}
+          {coin.dexscreener?.marketMetrics && (
+            <div className="panel-section">
+              <h3>📊 Market Metrics</h3>
+              <div className="market-metrics-grid">
+                <div className="metric-item">
+                  <span className="metric-label">Market Cap</span>
+                  <span className="metric-value">${formatNumber(coin.dexscreener.marketMetrics.marketCap || coin.market_cap_usd || 0)}</span>
+                </div>
+                <div className="metric-item">
+                  <span className="metric-label">FDV</span>
+                  <span className="metric-value">${formatNumber(coin.dexscreener.marketMetrics.fdv || 0)}</span>
+                </div>
+                <div className="metric-item">
+                  <span className="metric-label">FDV/MC Ratio</span>
+                  <span className="metric-value">
+                    {coin.dexscreener.marketMetrics.fdvToMcapRatio ? 
+                      `${coin.dexscreener.marketMetrics.fdvToMcapRatio.toFixed(2)}x` 
+                      : 'N/A'
+                    }
+                  </span>
+                </div>
+                <div className="metric-item">
+                  <span className="metric-label">Boost Status</span>
+                  <span className="metric-value">
+                    {coin.dexscreener.boosts > 0 ? 
+                      <span className="boost-badge">🚀 {coin.dexscreener.boosts} Active</span> 
+                      : 'None'
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Enhanced Social Links */}
+          {coin.dexscreener?.qualityScore && (
+            <div className="panel-section">
+              <h3>🔗 Enhanced Social & Quality</h3>
+              <div className="quality-score-grid">
+                <div className="quality-item">
+                  <span className="quality-label">Image Quality</span>
+                  <span className={`quality-indicator ${coin.dexscreener.qualityScore.hasImage ? 'good' : 'poor'}`}>
+                    {coin.dexscreener.qualityScore.hasImage ? '✅ Yes' : '❌ No'}
+                  </span>
+                </div>
+                <div className="quality-item">
+                  <span className="quality-label">Social Links</span>
+                  <span className={`quality-indicator ${coin.dexscreener.qualityScore.hasSocials ? 'good' : 'poor'}`}>
+                    {coin.dexscreener.qualityScore.hasSocials ? '✅ Yes' : '❌ No'}
+                  </span>
+                </div>
+                <div className="quality-item">
+                  <span className="quality-label">Description</span>
+                  <span className={`quality-indicator ${coin.dexscreener.qualityScore.hasDescription ? 'good' : 'poor'}`}>
+                    {coin.dexscreener.qualityScore.hasDescription ? '✅ Rich' : '❌ Basic'}
+                  </span>
+                </div>
+                <div className="quality-item">
+                  <span className="quality-label">Data Source</span>
+                  <span className="quality-indicator good">
+                    {coin.enriched ? '✅ Enhanced' : '⚪ Basic'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+
+      </div>
+      
+      {/* Copy Address Functionality */}
+      {copyMessage && (
+        <div className="copy-message-toast">{copyMessage}</div>
+      )}
+      
+      {/* About Modal */}
+      <AboutModal 
+        coin={coin}
+        isOpen={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+        onTradeClick={onTradeClick}
+      />
+    </div>
+  );
+});
+
+CoinCard.displayName = 'CoinCard';
+
+export default CoinCard;

@@ -1,22 +1,22 @@
 .bottom-nav {
   position: fixed;
-  bottom: 16px; /* lifted from bottom edge */
+  bottom: 16px;
   left: 50%;
-  transform: translateX(-50%); /* center horizontally */
-  width: calc(100vw - 32px); /* margin on sides */
-  max-width: 650px; /* match max width of cards */
+  transform: translateX(-50%);
+  width: calc(100% - 32px); /* respect parent container width */
+  max-width: 398px; /* 430px container - 32px margins = 398px max */
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.95) !important; /* modern black with slight transparency */
+  background: rgba(0, 0, 0, 0.95) !important;
   backdrop-filter: blur(20px);
   box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 0.3);
   z-index: 100;
   padding: 0 4px;
-  height: 56px; /* increased height for modern feel */
-  gap: 0.5vw;
-  border: 1px solid rgba(255, 255, 255, 0.08); /* subtle light border */
-  border-radius: 32px; /* rounded like the cards */
+  height: 48px;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
 }
 
 .nav-btn {
@@ -31,7 +31,7 @@
   flex: 1 1 0;
   min-width: 44px;
   cursor: pointer;
-  padding: 8px 0; /* increased padding for modern feel */
+  padding: 6px 0; /* reduced padding for more compact feel */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* smooth modern transition */
   border-radius: 12px; /* more rounded for modern look */
 }
@@ -92,4 +92,72 @@
   font-weight: 500;
   color: inherit; /* inherit color from parent nav-btn */
   margin-top: 2px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 430px) {
+  .bottom-nav {
+    width: calc(100vw - 24px); /* use viewport width on small screens */
+    max-width: none;
+    bottom: 12px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  .bottom-nav {
+    width: calc(100vw - 20px);
+    gap: 4px;
+    height: 44px;
+    padding: 0 2px;
+  }
+  
+  .nav-btn {
+    min-width: 40px;
+    padding: 4px 0;
+    font-size: 12px;
+  }
+  
+  .nav-icon {
+    font-size: 16px;
+  }
+  
+  .nav-label {
+    font-size: 9px;
+  }
+  
+  .nav-btn-trade {
+    min-width: 55px;
+    font-size: 13px;
+    margin: 0 6px;
+  }
+}
+
+@media (max-width: 320px) {
+  .bottom-nav {
+    width: calc(100vw - 16px);
+    bottom: 8px;
+    gap: 2px;
+    height: 40px;
+    padding: 0 1px;
+  }
+  
+  .nav-btn {
+    min-width: 36px;
+    padding: 3px 0;
+  }
+  
+  .nav-icon {
+    font-size: 15px;
+  }
+  
+  .nav-label {
+    font-size: 8px;
+  }
+  
+  .nav-btn-trade {
+    min-width: 50px;
+    font-size: 12px;
+    margin: 0 4px;
+  }
 }

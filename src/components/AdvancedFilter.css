@@ -1,0 +1,338 @@
+/* Filters Button */
+.filters-button {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 1001;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 20px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.filters-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.filters-button.active {
+  background: rgba(74, 144, 226, 0.8);
+  border-color: rgba(74, 144, 226, 0.3);
+  color: #fff;
+}
+
+.filters-button svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Filters Button positioned relative to banner */
+.filters-button.banner-positioned {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  left: auto;
+}
+
+/* Modal Overlay */
+.filter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 2002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal Container */
+.filter-modal {
+  background: #1a1a1a;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.filter-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-modal-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* Modal Content */
+.filter-modal-content {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+.filter-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-modal-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.filter-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Filter Sections */
+.filter-section {
+  margin-bottom: 32px;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-section h3 {
+  margin: 0 0 16px 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Input Styles */
+.filter-section input,
+.filter-section select {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.filter-section input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-section input:focus,
+.filter-section select:focus {
+  border-color: rgba(74, 144, 226, 0.5);
+  background: rgba(74, 144, 226, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.filter-section select {
+  cursor: pointer;
+}
+
+.filter-section select option {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* Modal Footer */
+.filter-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clear-button,
+.apply-button {
+  flex: 1;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.clear-button {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clear-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.apply-button {
+  background: #4a90e2;
+  color: #fff;
+}
+
+.apply-button:hover {
+  background: #357abd;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+/* Volume Timeframe Sections */
+.volume-timeframe-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.volume-timeframe-section:last-child {
+  margin-bottom: 0;
+}
+
+.volume-timeframe-section h4 {
+  margin: 0 0 12px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filter-modal {
+    margin: 20px;
+    max-height: 85vh;
+  }
+  
+  .filter-modal-header,
+  .filter-modal-content,
+  .filter-modal-footer {
+    padding: 20px;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .filters-button {
+    top: 10px;
+    right: 10px;
+    padding: 3px 6px;
+    font-size: 9px;
+    gap: 3px;
+    min-height: 18px;
+  }
+  
+  .filters-button svg {
+    width: 9px;
+    height: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-modal-overlay {
+    padding: 0;
+  }
+  
+  .filter-modal {
+    border-radius: 0;
+    margin: 0;
+    max-height: 100vh;
+  }
+  
+  .filter-modal-header h2 {
+    font-size: 18px;
+  }
+}

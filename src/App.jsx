@@ -1,16 +1,18 @@
-import React, { useState, lazy, Suspense } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import './App.css'
-import TokenScroller from './components/TokenScroller'
+import ModernTokenScroller from './components/ModernTokenScroller'
 import FavoritesGrid from './components/FavoritesGrid'
 import BottomNavBar from './components/BottomNavBar'
-import FilterModal from './components/FilterModal'
 import TopTabs from './components/TopTabs'
-import JupiterEmbedModal from './components/JupiterEmbedModal'
 import WalletDebug from './components/WalletDebug'
-import DarkModeToggle from './components/DarkModeToggle'
 import CoinSearchModal from './components/CoinSearchModal'
+import CoinListModal from './components/CoinListModal'
+import ProfileView from './components/ProfileView'
+import JupiterTradeModal from './components/JupiterTradeModal'
 
 function App() {
+  console.log('%cMoonfeed redeploy test: build timestamp ' + new Date().toISOString(), 'background: #4caf50; color: white; padding:4px;');
+
   const [activeTab, setActiveTab] = useState('home');
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -19,40 +21,57 @@ function App() {
       return [];
     }
   });
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [filters, setFilters] = useState({ type: 'new' });
+  const [filters, setFilters] = useState({ type: 'trending' });
+  const [advancedFilters, setAdvancedFilters] = useState(null); // For advanced filtering
+  const [isAdvancedFilterActive, setIsAdvancedFilterActive] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false); // For filter modal state
   const [selectedCoin, setSelectedCoin] = useState(null); // For full coin view
-  const [currentViewedCoin, setCurrentViewedCoin] = useState(null); // For trading
+  const [currentViewedCoin, setCurrentViewedCoin] = useState(null); // For current viewing
   const [visibleCoins, setVisibleCoins] = useState([]); // Track currently visible coins
-  const [tradingModalOpen, setTradingModalOpen] = useState(false); // For trading modal
-  const [tradeCoin, setTradeCoin] = useState(null); // Coin explicitly chosen for trading
+  const [tradeModalOpen, setTradeModalOpen] = useState(false); // Jupiter trade modal
+  const [coinToTrade, setCoinToTrade] = useState(null); // Coin selected for trading
+  const [coinListModalOpen, setCoinListModalOpen] = useState(false); // Coin list modal
+  const [coinListModalFilter, setCoinListModalFilter] = useState(null); // Filter type for coin list modal
 
   // Listen for favorites changes from TokenScroller
   const handleFavoritesChange = (newFavs) => {
     setFavorites(newFavs);
   };
 
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    } catch (error) {
+      console.error('Failed to save favorites to localStorage:', error);
+    }
+  }, [favorites]);
+
   // Handle coin click from favorites grid
   const handleCoinClick = (coin) => {
     setSelectedCoin(coin);
-    setCurrentViewedCoin(coin); // Ensure the current viewed coin is set for trading
+    setCurrentViewedCoin(coin); // Ensure the current viewed coin is set
     setActiveTab('coin-detail');
   };
 
-  // Handle trade button click - should set the current coin being viewed
+  // Handle trade button click - open Jupiter modal with the coin
   const handleTradeClick = (coin) => {
-    setCurrentViewedCoin(coin);
-    setTradeCoin(coin);
-    setTradingModalOpen(true);
+    console.log('🚀 Trade button clicked for:', coin?.symbol);
+    if (coin) {
+      setCoinToTrade(coin);
+      setTradeModalOpen(true);
+    }
   };
 
-  // Handle global trade button click (from nav) - use the current viewed coin
+  // Handle global trade button click - trade current viewed coin
   const handleGlobalTradeClick = () => {
-    const coin = currentViewedCoin || (visibleCoins.length > 0 ? visibleCoins[0] : null);
-    if (coin) {
-      setTradeCoin(coin);
-      setTradingModalOpen(true);
+    console.log('🚀 Global trade button clicked!');
+    if (currentViewedCoin) {
+      setCoinToTrade(currentViewedCoin);
+      setTradeModalOpen(true);
+    } else {
+      console.log('⚠️ No coin currently viewed for trading');
     }
   };
 
@@ -62,7 +81,15 @@ function App() {
   };
 
   // Handle current coin change from TokenScroller (for auto-tracking the coin in view)
-  const handleCurrentCoinChange = (coin) => {
+  const handleCurrentCoinChange = (coin, index) => {
+    console.log('🎯 APP: Current coin changed:', {
+      symbol: coin?.symbol,
+      mintAddress: coin?.mintAddress,
+      index: index,
+      isEnriched: coin?.enriched,
+      hasRealData: coin?.market_cap_usd > 0
+    });
+    
     setCurrentViewedCoin(coin);
   };
 
@@ -73,20 +100,38 @@ function App() {
     }
   }, [activeTab, selectedCoin]);
 
-  // Show modal when Filters tab is active
-  React.useEffect(() => {
-    if (activeTab === 'filters') setFilterModalOpen(true);
-    else setFilterModalOpen(false);
-  }, [activeTab]);
-
-  const handleApplyFilters = (newFilters) => {
-    setFilters(newFilters);
-    setActiveTab('home'); // Go back to home after applying
-  };
-
   // Handle top tab filter changes
   const handleTopTabFilterChange = (newFilters) => {
     setFilters(newFilters);
+    // Clear advanced filters when using top tabs
+    setAdvancedFilters(null);
+    setIsAdvancedFilterActive(false);
+  };
+
+  // Handle advanced filter changes
+  const handleAdvancedFilter = (advancedFilterParams) => {
+    console.log('🔧 APP: Advanced filters applied:', advancedFilterParams);
+    setAdvancedFilters(advancedFilterParams);
+    setIsAdvancedFilterActive(true);
+    // Switch to custom tab when advanced filters are applied
+    console.log('🔧 APP: Switching to custom tab');
+    setFilters({ type: 'custom' });
+  };
+
+  // Handle active tab click - show coin list modal
+  const handleActiveTabClick = (filterType) => {
+    console.log('📋 Active tab clicked, showing coin list for:', filterType);
+    setCoinListModalFilter(filterType);
+    setCoinListModalOpen(true);
+  };
+
+  // Handle coin selection from coin list modal
+  const handleCoinFromList = (coin) => {
+    console.log('🪙 Coin selected from list:', coin.symbol);
+    setSelectedCoin(coin);
+    setCurrentViewedCoin(coin);
+    setActiveTab('coin-detail');
+    setCoinListModalOpen(false);
   };
 
   // Handle search modal
@@ -106,26 +151,50 @@ function App() {
     setActiveTab('coin-detail');
   };
 
+  // Handle Jupiter swap success
+  const handleSwapSuccess = ({ txid, swapResult, quoteResponseMeta, coin }) => {
+    console.log('🎉 Swap successful for', coin.symbol, 'TX:', txid);
+    // You can add success notifications, analytics, etc. here
+    // Modal will remain open to show success state
+  };
+
+  // Handle Jupiter swap error
+  const handleSwapError = ({ error, quoteResponseMeta, coin }) => {
+    console.error('❌ Swap failed for', coin.symbol, error);
+    // You can add error notifications, analytics, etc. here
+  };
+
+  // Handle Jupiter modal close
+  const handleTradeModalClose = () => {
+    setTradeModalOpen(false);
+    setCoinToTrade(null);
+  };
+
   return (
     <div style={{ minHeight: '100vh', position: 'relative', paddingBottom: 72 }}>
-      {/* Dark Mode Toggle - Always visible in top left */}
-      <DarkModeToggle />
-      
       {/* Top tabs - only show on home screen */}
-      {activeTab !== 'favorites' && activeTab !== 'coin-detail' && (
+      {activeTab !== 'favorites' && activeTab !== 'coin-detail' && activeTab !== 'profile' && (
         <TopTabs 
-          activeFilter={filters.type || 'new'} 
+          activeFilter={filters.type || 'trending'} 
           onFilterChange={handleTopTabFilterChange}
+          onActiveTabClick={handleActiveTabClick}
+          showFilterButton={false}
+          onFilterClick={() => {
+            setIsFilterModalOpen(true);
+          }}
+          isFilterActive={isAdvancedFilterActive}
         />
       )}
       
-      <div style={{ paddingTop: activeTab !== 'favorites' && activeTab !== 'coin-detail' ? '40px' : '0' }}>
+      <div style={{ paddingTop: '0' }}>
         {activeTab === 'favorites' ? (
         <FavoritesGrid
           favorites={favorites}
           onCoinClick={handleCoinClick}
           onFavoritesChange={handleFavoritesChange}
         />
+      ) : activeTab === 'profile' ? (
+        <ProfileView />
       ) : activeTab === 'coin-detail' && selectedCoin ? (
         <div style={{ position: 'relative' }}>
           {/* Back button for coin detail view */}
@@ -134,7 +203,7 @@ function App() {
             style={{
               position: 'fixed',
               top: 20,
-              left: 80, // Moved right to avoid dark mode toggle
+              left: 20, // Moved back to left edge since dark mode toggle is removed
               zIndex: 1000,
               background: 'rgba(0, 0, 0, 0.9)',
               color: '#fff',
@@ -164,17 +233,19 @@ function App() {
           >
             ←
           </button>
-          <TokenScroller
+          <ModernTokenScroller
             onFavoritesChange={handleFavoritesChange}
             favorites={[selectedCoin]} // Show only the selected coin
             filters={{}}
             onlyFavorites={true}
             onTradeClick={handleTradeClick}
             onCurrentCoinChange={handleCurrentCoinChange}
+            advancedFilters={null}
+            showFiltersButton={false} // Don't show filters in coin detail view
           />
         </div>
       ) : (
-        <TokenScroller
+        <ModernTokenScroller
           onFavoritesChange={handleFavoritesChange}
           favorites={favorites}
           filters={filters}
@@ -182,20 +253,13 @@ function App() {
           onTradeClick={handleTradeClick}
           onVisibleCoinsChange={handleVisibleCoinsChange}
           onCurrentCoinChange={handleCurrentCoinChange}
+          advancedFilters={advancedFilters}
+          onAdvancedFilter={handleAdvancedFilter}
+          isAdvancedFilterActive={isAdvancedFilterActive}
+          showFiltersButton={true} // Show filters button on home view
         />
       )}
       </div>
-      
-      {/* Jupiter Embed Modal - Official Jupiter Plugin */}
-      {tradingModalOpen && (
-        <Suspense fallback={<div>Loading trading interface...</div>}>
-          <JupiterEmbedModal
-            visible={tradingModalOpen}
-            onClose={() => { setTradingModalOpen(false); setTradeCoin(null); }}
-            selectedCoin={tradeCoin || currentViewedCoin}
-          />
-        </Suspense>
-      )}
       
       <BottomNavBar 
         activeTab={activeTab === 'coin-detail' ? 'favorites' : activeTab} 
@@ -208,21 +272,27 @@ function App() {
         }}
         onSearchClick={handleSearchClick}
       />
-      <FilterModal
-        visible={filterModalOpen}
-        onClose={() => setActiveTab('home')}
-        onApply={handleApplyFilters}
-        initialFilters={filters}
-      />
-      <CoinSearchModal
-        visible={searchModalOpen}
-        onClose={handleSearchClose}
-        onCoinFound={handleCoinFound}
-      />
       <CoinSearchModal
         visible={searchModalOpen}
         onClose={handleSearchClose}
         onCoinSelect={handleCoinFound}
+      />
+      
+      {/* Coin List Modal */}
+      <CoinListModal
+        visible={coinListModalOpen}
+        onClose={() => setCoinListModalOpen(false)}
+        filterType={coinListModalFilter}
+        onCoinSelect={handleCoinFromList}
+      />
+      
+      {/* Jupiter Trade Modal */}
+      <JupiterTradeModal
+        isOpen={tradeModalOpen}
+        onClose={handleTradeModalClose}
+        coin={coinToTrade}
+        onSwapSuccess={handleSwapSuccess}
+        onSwapError={handleSwapError}
       />
     </div>
   )

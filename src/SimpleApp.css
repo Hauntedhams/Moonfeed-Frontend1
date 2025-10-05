@@ -1,0 +1,32 @@
+/* Simple App Container for Mockup Design */
+.app-container {
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  margin: 0 auto;
+  background: #ffffff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Ensure everything fits within phone dimensions */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #f0f0f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: #ffffff;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
