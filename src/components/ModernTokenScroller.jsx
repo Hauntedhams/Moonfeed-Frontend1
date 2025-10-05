@@ -3,6 +3,7 @@ import CoinCard from './CoinCard';
 import DexScreenerManager from './DexScreenerManager';
 import AdvancedFilter from './AdvancedFilter';
 import MoonfeedInfoButton from './MoonfeedInfoModal';
+import { API_CONFIG, getApiUrl, getFullApiUrl } from '../config/api';
 import './ModernTokenScroller.css';
 
 // Modern TikTok-style token scroller with DexScreener integration
@@ -31,7 +32,7 @@ const ModernTokenScroller = ({
   const isScrollLocked = useRef(false);
   
   // API base configuration
-  const API_BASE = 'http://localhost:3001/api/coins';
+  const API_BASE = API_CONFIG.COINS_API;
 
   // Enrich coins with DexScreener data
   const enrichCoins = useCallback(async (mintAddresses) => {
@@ -40,7 +41,7 @@ const ModernTokenScroller = ({
     try {
       console.log(`🎨 Enriching ${mintAddresses.length} coins with DexScreener data (including banners)...`);
       
-      const response = await fetch('http://localhost:3001/api/coins/enrich', {
+      const response = await fetch(getApiUrl('/enrich'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -249,7 +250,7 @@ const ModernTokenScroller = ({
         batchCount++;
         console.log(`🎨 Silent enrichment batch ${batchCount} starting at index ${startIndex}`);
         
-        const response = await fetch('http://localhost:3001/api/coins/background-enrich', {
+        const response = await fetch(getApiUrl('/background-enrich'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -313,7 +314,7 @@ const ModernTokenScroller = ({
     try {
       console.log('🚀 Force enriching all coins with DexScreener data...');
       
-      const response = await fetch('http://localhost:3001/api/coins/force-enrich', {
+      const response = await fetch(getApiUrl('/force-enrich'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

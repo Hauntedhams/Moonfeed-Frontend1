@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
+import { API_CONFIG } from '../config/api';
 import './CoinSearchModal.css';
 
 function resolveApiBase() {
-  const explicit = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
-  if (explicit && explicit.trim().length > 0) return explicit.replace(/\/$/, '');
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (host !== 'localhost' && host !== '127.0.0.1') {
-      return 'https://moonfeed-backend.onrender.com';
-    }
-  }
-  return 'http://localhost:3001';
+  return API_CONFIG.BASE_URL;
 }
 
 function CoinSearchModal({ visible, onClose, onCoinSelect }) {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { API_CONFIG } from '../config/api';
 import './CoinListModal.css';
 
-const API_BASE = 'http://localhost:3001/api/coins';
+const API_BASE = API_CONFIG.COINS_API;
 
 function CoinListModal({ visible, onClose, filterType, onCoinSelect }) {
   const [coins, setCoins] = useState([]);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getFullApiUrl } from '../config/api';
 import './TopTradersList.css';
 
 const TopTradersList = ({ coinAddress }) => {
@@ -19,7 +20,7 @@ const TopTradersList = ({ coinAddress }) => {
     try {
       console.log(`🔍 Loading top traders for: ${coinAddress}`);
       
-      const response = await fetch(`http://localhost:3001/api/top-traders/${coinAddress}`);
+      const response = await fetch(getFullApiUrl(`/api/top-traders/${coinAddress}`));
       const result = await response.json();
 
       if (!response.ok) {
